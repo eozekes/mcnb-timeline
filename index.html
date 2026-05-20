@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Child New Beginning — Release Timeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --phase-pre:#7C6FAA;--phase-pre-light:#EDE9F7;
+  --phase-snf:#C96F3A;--phase-snf-light:#FAF0E6;
+  --phase-summer:#3A8C6E;--phase-summer-light:#E5F5EF;
+  --phase-launch:#C43D3D;--phase-launch-light:#FBE9E9;
+  --phase-post:#3B6FA5;--phase-post-light:#E6EFF8;
+  --bg:#F5F3EF;--surface:#FFFFFF;
+  --text-primary:#1C1B19;--text-secondary:#6B6860;--text-tertiary:#9E9C97;
+  --border:rgba(0,0,0,0.09);--border-med:rgba(0,0,0,0.14);
+  --yellow-bg:#FFFAEC;--yellow-border:#E8C840;
+  --red-bg:#FFF0F0;--red-border:#E86464;
+  --mcl-bg:#F2ECF9;--mcl-border:#9B7AC8;--mcl-header:#7B4FB8;
+  --col-w:140px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+
+/* HEADER */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header-title{font-family:'DM Serif Display',serif;font-size:17px;letter-spacing:-0.02em}
+.header-sub{font-size:12px;color:var(--text-tertiary);margin-top:1px}
+.nav-btn{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid var(--border-med);background:transparent;color:var(--text-secondary);cursor:pointer;text-decoration:none;transition:all 0.15s;display:inline-block;margin-left:6px}
+.nav-btn:hover{background:var(--bg);color:var(--text-primary)}
+
+/* FILTER */
+.filter-bar{padding:16px 32px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary);margin-right:4px}
+.phase-pill{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;border:none;cursor:pointer;transition:all 0.15s;opacity:0.45}
+.phase-pill.active{opacity:1}
+.phase-pill[data-phase="all"]{background:var(--text-primary);color:white;opacity:1}
+.phase-pill[data-phase="pre"]{background:var(--phase-pre);color:white}
+.phase-pill[data-phase="snf"]{background:var(--phase-snf);color:white}
+.phase-pill[data-phase="summer"]{background:var(--phase-summer);color:white}
+.phase-pill[data-phase="launch"]{background:var(--phase-launch);color:white}
+.phase-pill[data-phase="post"]{background:var(--phase-post);color:white}
+
+/* LEGEND */
+.legend{display:flex;gap:20px;padding:12px 32px;flex-wrap:wrap;align-items:center}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-mcl{width:10px;height:10px;border-radius:2px;background:var(--mcl-border);flex-shrink:0}
+
+/* TIMELINE */
+.timeline-wrapper{margin:20px 0 0;padding:0 32px 32px;overflow-x:auto;cursor:grab;user-select:none;-webkit-overflow-scrolling:touch}
+.timeline-wrapper:active{cursor:grabbing}
+.timeline-inner{min-width:max-content;padding-bottom:8px}
+
+/* PHASE BAR */
+.phase-bar{display:flex;height:32px;border-radius:6px;overflow:hidden;margin-bottom:2px}
+.phase-segment{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:white;white-space:nowrap;padding:0 10px;transition:opacity 0.25s}
+
+/* MONTH ROW */
+.month-row{display:flex;height:28px;align-items:center}
+.month-cell{width:var(--col-w);flex-shrink:0;text-align:center;font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;transition:opacity 0.25s;padding-top:4px}
+
+/* SPINE */
+.spine-row{position:relative;height:72px;display:flex;align-items:center}
+.spine-line{position:absolute;left:0;right:0;top:50%;height:2px;background:var(--border-med);transform:translateY(-50%);border-radius:1px}
+.node-group{position:relative;width:var(--col-w);flex-shrink:0;display:flex;flex-direction:column;align-items:center;z-index:2;cursor:pointer;transition:opacity 0.25s}
+.node-dot{width:14px;height:14px;border-radius:50%;border:3px solid var(--surface);transition:transform 0.2s,box-shadow 0.2s;position:relative;z-index:2}
+.node-group:hover .node-dot{transform:scale(1.3);box-shadow:0 0 0 3px rgba(0,0,0,0.1)}
+.node-group.active .node-dot{transform:scale(1.4);box-shadow:0 0 0 4px rgba(0,0,0,0.15)}
+.node-label{font-size:10px;font-weight:500;text-align:center;margin-top:5px;line-height:1.35;max-width:110px;color:inherit}
+.node-mcl-badge{display:inline-block;width:7px;height:7px;border-radius:1px;background:var(--mcl-border);margin-left:4px;vertical-align:middle;flex-shrink:0;position:relative;top:-1px}
+.node-label-row{display:flex;align-items:center;justify-content:center;gap:0}
+
+/* phase colour helpers */
+.ph-pre  .node-dot{background:var(--phase-pre)}   .ph-pre  .node-label{color:var(--phase-pre)}
+.ph-snf  .node-dot{background:var(--phase-snf)}   .ph-snf  .node-label{color:var(--phase-snf)}
+.ph-summer .node-dot{background:var(--phase-summer)} .ph-summer .node-label{color:var(--phase-summer)}
+.ph-launch .node-dot{background:var(--phase-launch)} .ph-launch .node-label{color:var(--phase-launch)}
+.ph-post .node-dot{background:var(--phase-post)}  .ph-post .node-label{color:var(--phase-post)}
+.month-cell.ph-pre{color:var(--phase-pre)}
+.month-cell.ph-snf{color:var(--phase-snf)}
+.month-cell.ph-summer{color:var(--phase-summer)}
+.month-cell.ph-launch{color:var(--phase-launch)}
+.month-cell.ph-post{color:var(--phase-post)}
+.dimmed{opacity:0.15!important;pointer-events:none}
+
+/* PANEL */
+.panel-container{position:relative;margin-top:4px}
+.caret-svg{position:absolute;top:-10px;width:22px;height:11px;pointer-events:none;transform:translateX(-50%);z-index:3;display:none}
+.detail-panel{background:var(--surface);border-radius:10px;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.06);display:none;overflow:hidden}
+.detail-panel.open{display:block}
+.panel-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);position:relative}
+.panel-month{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px}
+.panel-title{font-family:'DM Serif Display',serif;font-size:21px;letter-spacing:-0.02em;line-height:1.2}
+.panel-subtitle{font-size:13px;color:var(--text-secondary);margin-top:4px}
+.close-btn{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:50%;border:1px solid var(--border-med);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text-secondary);transition:background 0.15s;z-index:5}
+.close-btn:hover{background:var(--border-med)}
+
+/* CARDS GRID */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--border)}
+.card{background:var(--surface);padding:18px 20px}
+.card-icon{font-size:18px;margin-bottom:10px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.3}
+.card-body{font-size:12.5px;line-height:1.6;color:var(--text-secondary);margin-bottom:10px}
+.tips-list{list-style:none;margin-bottom:10px}
+.tips-list li{font-size:12px;color:var(--text-secondary);line-height:1.5;padding:2px 0 2px 14px;position:relative}
+.tips-list li::before{content:'→';position:absolute;left:0;color:var(--text-tertiary);font-size:11px}
+
+.forgotten-box{background:var(--yellow-bg);border-left:3px solid var(--yellow-border);border-radius:0 6px 6px 0;padding:8px 10px;margin-top:8px}
+.forgotten-box .box-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#8C7A20;margin-bottom:4px}
+.forgotten-box li{font-size:11.5px;color:#6B5E18;line-height:1.5;padding:1px 0 1px 16px;position:relative;list-style:none}
+.forgotten-box li::before{content:'⚠';position:absolute;left:0;font-size:10px}
+
+.caution-box{background:var(--red-bg);border-left:3px solid var(--red-border);border-radius:0 6px 6px 0;padding:8px 10px;margin-top:6px}
+.caution-box .box-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#922020;margin-bottom:4px}
+.caution-box li{font-size:11.5px;color:#7A1E1E;line-height:1.5;padding:1px 0 1px 16px;position:relative;list-style:none}
+.caution-box li::before{content:'!';position:absolute;left:0;font-size:11px;font-weight:700}
+
+/* MCL CARD — visually distinct full card treatment */
+.card.card-mcl{background:var(--mcl-bg);border-left:4px solid var(--mcl-border)}
+.card.card-mcl .card-title{color:var(--mcl-header)}
+.card.card-mcl .card-body{color:#5a3d7a}
+.card.card-mcl .tips-list li{color:#5a3d7a}
+.card.card-mcl .tips-list li::before{color:var(--mcl-border)}
+.mcl-header-strip{display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.mcl-header-strip .mcl-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--mcl-header);background:rgba(155,122,200,0.18);padding:2px 8px;border-radius:10px}
+
+.ph-pre  .panel-month{color:var(--phase-pre)}
+.ph-snf  .panel-month{color:var(--phase-snf)}
+.ph-summer .panel-month{color:var(--phase-summer)}
+.ph-launch .panel-month{color:var(--phase-launch)}
+.ph-post .panel-month{color:var(--phase-post)}
+.ph-pre  .detail-panel{border-top:4px solid var(--phase-pre)}
+.ph-snf  .detail-panel{border-top:4px solid var(--phase-snf)}
+.ph-summer .detail-panel{border-top:4px solid var(--phase-summer)}
+.ph-launch .detail-panel{border-top:4px solid var(--phase-launch)}
+.ph-post .detail-panel{border-top:4px solid var(--phase-post)}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-title">My Child New Beginning — PC Release Timeline</div>
+    <div class="header-sub">May 2026 → December 2026</div>
+  </div>
+  <nav>
+    <a href="game_marketing_hub.html" class="nav-btn">← Marketing Hub</a>
+    <a href="game_task_tracker.html" class="nav-btn">Task Tracker</a>
+  </nav>
+</header>
+
+<div class="filter-bar">
+  <span class="filter-label">Phase</span>
+  <button class="phase-pill active" data-phase="all">All</button>
+  <button class="phase-pill active" data-phase="pre">Pre-launch prep</button>
+  <button class="phase-pill active" data-phase="snf">Steam Next Fest</button>
+  <button class="phase-pill active" data-phase="summer">Summer</button>
+  <button class="phase-pill active" data-phase="launch">PC Launch</button>
+  <button class="phase-pill active" data-phase="post">Post-launch</button>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--phase-pre)"></div>Pre-launch prep</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--phase-snf)"></div>Steam Next Fest</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--phase-summer)"></div>Summer</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--phase-launch)"></div>PC Launch</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--phase-post)"></div>Post-launch</div>
+  <div class="legend-item" style="margin-left:8px"><div class="legend-mcl"></div>Includes MCL notes</div>
+</div>
+
+<div class="timeline-wrapper" id="tw">
+  <div class="timeline-inner">
+
+    <!-- PHASE BAR: 8 cols × 140px = 1120px -->
+    <!-- May(1) Jun(1) Jul(1) Aug(1) Sep(1) Oct(1) Nov(1) Dec(1) -->
+    <div class="phase-bar">
+      <div class="phase-segment" data-phase="pre"    style="background:var(--phase-pre);   width:140px">Prep</div>
+      <div class="phase-segment" data-phase="snf"    style="background:var(--phase-snf);   width:140px">Next Fest</div>
+      <div class="phase-segment" data-phase="summer" style="background:var(--phase-summer);width:280px">Summer</div>
+      <div class="phase-segment" data-phase="launch" style="background:var(--phase-launch);width:140px">PC Launch</div>
+      <div class="phase-segment" data-phase="post"   style="background:var(--phase-post);  width:420px">Post-Launch</div>
+    </div>
+
+    <!-- MONTH ROW -->
+    <div class="month-row">
+      <div class="month-cell ph-pre">May '26</div>
+      <div class="month-cell ph-snf">Jun '26</div>
+      <div class="month-cell ph-summer">Jul '26</div>
+      <div class="month-cell ph-summer">Aug '26</div>
+      <div class="month-cell ph-launch">Sep '26</div>
+      <div class="month-cell ph-post">Oct '26</div>
+      <div class="month-cell ph-post">Nov '26</div>
+      <div class="month-cell ph-post">Dec '26</div>
+    </div>
+
+    <!-- SPINE -->
+    <div class="spine-row">
+      <div class="spine-line"></div>
+
+      <div class="node-group ph-pre" data-node="may26" data-phase="pre" onclick="window.openPanel('may26')">
+        <div class="node-dot"></div>
+        <div class="node-label-row"><span class="node-label">Demo &amp; Press Prep</span><span class="node-mcl-badge" title="Includes MCL notes"></span></div>
+      </div>
+
+      <div class="node-group ph-snf" data-node="jun26" data-phase="snf" onclick="window.openPanel('jun26')">
+        <div class="node-dot"></div>
+        <div class="node-label-row"><span class="node-label">Steam Next Fest</span><span class="node-mcl-badge" title="Includes MCL notes"></span></div>
+      </div>
+
+      <div class="node-group ph-summer" data-node="jul26" data-phase="summer" onclick="window.openPanel('jul26')">
+        <div class="node-dot"></div>
+        <div class="node-label-row"><span class="node-label">Summer Push</span><span class="node-mcl-badge" title="Includes MCL notes"></span></div>
+      </div>
+
+      <div class="node-group ph-summer" data-node="aug26" data-phase="summer" onclick="window.openPanel('aug26')">
+        <div class="node-dot"></div>
+        <div class="node-label-row"><span class="node-label">Showcases &amp; Content</span><span class="node-mcl-badge" title="Includes MCL notes"></span></div>
+      </div>
+
+      <div class="node-group ph-launch" data-node="sep26" data-phase="launch" onclick="window.openPanel('sep26')">
+        <div class="node-dot"></div>
+        <div class="node-label-row"><span class="node-label">PC Launch</span><span class="node-mcl-badge" title="Includes MCL notes"></span></div>
+      </div>
+
+      <div class="node-group ph-post" data-node="oct26" data-phase="post" onclick="window.openPanel('oct26')">
+        <div class="node-dot"></div>
+        <div class="node-label"><span class="node-label">Update Teasers</span></div>
+      </div>
+
+      <div class="node-group ph-post" data-node="nov26" data-phase="post" onclick="window.openPanel('nov26')">
+        <div class="node-dot"></div>
+        <div class="node-label"><span class="node-label">Influencer &amp; Confirms</span></div>
+      </div>
+
+      <div class="node-group ph-post" data-node="dec26" data-phase="post" onclick="window.openPanel('dec26')">
+        <div class="node-dot"></div>
+        <div class="node-label-row"><span class="node-label">Winter Update</span><span class="node-mcl-badge" title="Includes MCL notes"></span></div>
+      </div>
+    </div>
+
+    <!-- PANEL -->
+    <div class="panel-container" id="panelContainer">
+      <svg class="caret-svg" id="caretSvg" viewBox="0 0 22 11" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="0,11 11,0 22,11" fill="white" stroke="#e0ddd7" stroke-width="1"/>
+      </svg>
+      <div class="detail-panel" id="detailPanel"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const COL_W = 140;
+
+const NODE_POS = {
+  may26: 0, jun26: 1, jul26: 2, aug26: 3,
+  sep26: 4, oct26: 5, nov26: 6, dec26: 7
+};
+
+const MILESTONES = {
+  may26: {
+    phase: 'pre',
+    month: 'May 2026',
+    title: 'Demo Finalization & Outreach Prep',
+    subtitle: 'Pre-launch groundwork before the Steam Next Fest window',
+    cards: [
+      {
+        icon: '🎮',
+        title: 'Finalize the demo build',
+        body: 'The demo is the centrepiece of the Steam Next Fest strategy. Use May to lock scope, close critical bugs, and ensure the build represents the full PC experience — not just the mobile port.',
+        tips: [
+          'Define a clear demo endpoint (natural stopping moment, not mid-chapter)',
+          'QA the demo on a range of PC specs including low-end hardware',
+          'Add a "wishlist on Steam" prompt at the demo end screen',
+          'Enable Steam Cloud saves in the demo if possible — reduces friction on return visits'
+        ],
+        forgotten: [
+          'Store page must be published (even if hidden) before the demo can go live',
+          'Demo build takes 3–5 days to pass Steam review — submit before June 1',
+          'Set the demo to "coming soon" in Steamworks to gather wishlists early'
+        ],
+        caution: ['Do not over-scope the demo — a shorter polished slice outperforms a long buggy one every time']
+      },
+      {
+        icon: '📋',
+        title: 'Build press & influencer lists',
+        body: 'Assemble tiered press and influencer lists before reaching out in June. Good lists save time under deadline pressure and ensure no key contact is missed.',
+        tips: [
+          'Tier press: Tier 1 = major outlets (IGN, Eurogamer, RPS), Tier 2 = mid-size, Tier 3 = niche/faith/empathy beat',
+          'Tier influencers by reach: 500K+, 100K–500K, 10K–100K micro',
+          'Flag influencers already playing games-as-empathy or narrative games (GRIS, Spiritfarer, etc.)',
+          'Identify language-specific contacts for German, French, Spanish, Brazilian Portuguese markets',
+          'Mark existing contacts from MCL promotion — warm relationships first'
+        ],
+        forgotten: [
+          'Verify email addresses — many bounce from old databases',
+          'Check which influencers have already covered the mobile version — different pitch needed',
+          'Note embargoed vs. non-embargoed contacts separately'
+        ]
+      },
+      {
+        icon: '🏆',
+        title: 'Nordic Games & awards recognition',
+        body: 'Nordic Games is a key visibility moment. Build credibility materials — an "as seen at Nordic Games" block is powerful in press pitches and on the Steam page.',
+        tips: [
+          'Create a summary doc of all existing press coverage and award nominations',
+          'Add award laurels / nomination badges to the Steam page capsule art',
+          'Reach out to Nordic Games contacts about any additional visibility opportunities',
+          'Draft 3–4 pull quotes from existing coverage for use in June outreach emails'
+        ],
+        forgotten: [
+          'Steam capsule art changes need re-approval — allow 48–72hrs',
+          'Pull quotes need permission confirmation if used in paid materials'
+        ]
+      },
+      {
+        icon: '💜',
+        title: 'MCL: Summer campaign creative planning',
+        body: 'Start brainstorming ad creatives for the MCL summer campaign. Audit what existing video content can be repurposed with new edits, and brief any new creative production.',
+        tips: [
+          'Audit existing MCL video ad library — what performed, what can be refreshed',
+          'Brief new edit variants: 15s, 30s, 60s cuts for different platforms',
+          'Identify whether new gameplay footage is needed or existing content covers the brief',
+          'Plan creative themes: "emotional impact" vs. "historical education" angles'
+        ],
+        forgotten: [
+          'New video edits take 2–3 weeks minimum — brief early to hit June deadline',
+          'Assets need to be platform-sized: 9:16 for TikTok/Reels, 16:9 for YouTube, 1:1 for Meta feed'
+        ],
+        isMCL: true
+      }
+    ]
+  },
+
+  jun26: {
+    phase: 'snf',
+    month: 'June 2026',
+    title: 'Steam Next Fest',
+    subtitle: 'Keys out by June 4 · Next Fest opens June 15 · Late June: ads & new languages',
+    cards: [
+      {
+        icon: '🔑',
+        title: 'Press & influencer key distribution',
+        body: 'Send demo keys with enough lead time for creators to play before the embargo lifts on June 15. Target June 4 for Tier 1 contacts.',
+        tips: [
+          'Send Tier 1 press and creators by June 4 — they need time to prepare content',
+          'Send Tier 2 by June 7–8 with a softer embargo (coverage ok from June 15)',
+          'Identify influencers who can be hosted as "recommended by developers" on the Steam page',
+          'Find influencers who can mention the free mobile version to drive cross-platform discovery',
+          'Personalise each pitch — reference their past coverage or audience fit'
+        ],
+        forgotten: [
+          'Steam curator invites are separate from press keys — send those too',
+          'Keys sent via Keymailer or manually? Confirm tracking method in advance',
+          'Include a one-pager with key game messages, embargo date, and press kit link'
+        ],
+        caution: ['Do not blast keys to the full list at once — stagger to manage embargo coordination']
+      },
+      {
+        icon: '🚀',
+        title: 'Steam Next Fest activation (June 15)',
+        body: 'June 15 is the start of Steam Next Fest — the highest-traffic window before launch. Every piece of content, community event, and creator post should land in this window.',
+        tips: [
+          'Rapid social cadence: minimum 2 posts per day across all channels during Next Fest',
+          'Upload a YouTube video specifically about the demo (walkthrough, devlog, or "why this game matters")',
+          'Creator embargo lifts June 15 — repost and amplify all creator content immediately',
+          'Host a Reddit AMA during Next Fest (announce in advance)',
+          'Schedule at least 2 "Developers Play" live events on the Steam page'
+        ],
+        forgotten: [
+          'Steam Next Fest requires a demo trailer uploaded and approved before June 15',
+          'Developer broadcasts on Steam require Steamworks setup — test the stream before June 15',
+          'Pin a Discord message with the wishlist link and demo download on June 15 morning'
+        ],
+        caution: [
+          'Do not run a sale on the mobile version during Next Fest — it dilutes PC wishlist urgency',
+          'Monitor demo reviews daily — negative reviews in the first 48hrs suppress Steam algorithmic visibility'
+        ]
+      },
+      {
+        icon: '🎯',
+        title: 'Goals & community events',
+        body: 'Track the three core Next Fest KPIs — Steam wishlists, Discord sign-ups, mobile player uplift — and run community events to convert the traffic spike into lasting engagement.',
+        tips: [
+          'Set a daily wishlist target and post internal updates — creates accountability',
+          'Use UTM-tagged links in every channel to track which source drives wishlists',
+          'Run a Discord-gated exclusive (wallpaper, early update) to incentivise sign-ups',
+          'Launch a fanart contest timed to Next Fest — extends campaign reach organically',
+          'Apply for iTunes featuring for a September slot — frame around "games as empathy"'
+        ],
+        forgotten: [
+          'Steamworks analytics are delayed ~48hrs — use external UTM tracking for real-time view',
+          'Discord invite link expires by default — set to "no expiry" before campaign starts',
+          'Apple featuring application must be submitted by June 10 at the latest for September slot'
+        ]
+      },
+      {
+        icon: '🌍',
+        title: 'Language outreach & late-June ads',
+        body: 'Activate language-specific contacts for key markets, and begin investigating in-game mobile ad placements and new language early access invites based on Next Fest geography data.',
+        tips: [
+          'Prioritise German, French, Spanish, Brazilian Portuguese based on MCL install data',
+          'Find local gaming outlets in each market — not only English-language reviewers',
+          'Research in-game ad networks that reach narrative/family game audiences on mobile',
+          'Based on Next Fest wishlist geography, identify the strongest new language market for early access',
+          'Send early access keys to top-tier press in that market by June 28'
+        ],
+        forgotten: [
+          'Steam store page must support all target languages before outreach — missing translations hurt conversion',
+          'In-game ad networks require account setup and creative assets — start the process now even if campaign runs in August'
+        ]
+      },
+      {
+        icon: '💜',
+        title: 'MCL: Sales, keys & summer campaign start',
+        body: 'June is the window for MCL sales, creator key giveaways, and the start of the paid summer campaign. Leverage MCL creator relationships to cross-promote the MCNB demo.',
+        tips: [
+          'Run a mobile key giveaway via creators who played MCL recently — gives them fresh content',
+          'Ask creators to play the MCNB demo while giving away MCL keys — natural bridge',
+          'Start the paid summer campaign in late June: English-speaking + Brazil + one new test region',
+          'Campaign goal: MCL awareness + warm funnel for MCNB PC launch in September'
+        ],
+        forgotten: [
+          'MCL mobile sales should not overlap with MCNB launch window in September — plan the cadence now',
+          'Creator key giveaway needs tracking links per creator for attribution',
+          'Confirm new test region selection based on MCL install data before briefing the media buy'
+        ],
+        isMCL: true
+      }
+    ]
+  },
+
+  jul26: {
+    phase: 'summer',
+    month: 'July 2026',
+    title: 'Summer Momentum',
+    subtitle: 'Awards, community events & Discord Quests evaluation',
+    cards: [
+      {
+        icon: '🏅',
+        title: 'Awards & community events',
+        body: 'Maintain momentum through summer with awards season activity and regular community events that keep the MCNB audience engaged between Next Fest and the September launch.',
+        tips: [
+          'Submit MCNB to any awards with July deadlines (indie, narrative, empathy-focused)',
+          'Run a mid-summer Discord event: Q&A with developers, lore discussion, or fanart contest',
+          'Post development updates or "making of PC version" content — community loves transparency',
+          'Consider a cosmetic update for the mobile version to re-engage lapsed players'
+        ],
+        forgotten: [
+          'Awards submissions have specific asset requirements — screenshots, trailers, company info — prepare a submission kit',
+          'Community events need to be announced 1 week in advance for good turnout'
+        ]
+      },
+      {
+        icon: '💜',
+        title: 'MCL: Full-funnel summer campaign & Discord Quests',
+        body: 'July is ideal for a two-track MCL campaign — mobile re-engagement and PC awareness — and the right window to roll out a Discord Quests experience linking MCL and MCNB.',
+        tips: [
+          'Mobile track 1 — Android/LITE: focus on Brazil, Turkey, Russia, Poland and emerging markets',
+          'Mobile track 2 — iOS/Premium Android: focus on English-speaking, Germany, France, Spain; test Turkey and Brazil at smaller budget',
+          'PC track: English-speaking awareness, timed to pre-launch MCNB visibility',
+          'A/B test 2 creative angles per track — emotional vs. educational',
+          'Discord Quests: design quest concepts — Steam achievements (caring for the child) trigger Discord rewards',
+          'Explore a secondary quest angle: historical Lebensborn education steps on Discord unlock MCL content',
+          'Review Discord Quests eligibility at discord.com/ads/quests'
+        ],
+        forgotten: [
+          'Brazil and Turkey campaigns require local currency pricing review — check price competitiveness',
+          'iOS campaigns need ATT opt-in messaging configured',
+          'Discord Quests require a partnership agreement with Discord — lead time is 4–8 weeks minimum',
+          'Quest rewards must be defined in advance — coordinate with dev team',
+          'Steam achievement integration requires Steamworks API work — check dev availability'
+        ],
+        caution: [
+          'Discord Quests are a newer format — evaluate case studies before committing budget; proceed only if the mechanic feels authentic to the game'
+        ],
+        isMCL: true
+      }
+    ]
+  },
+
+  aug26: {
+    phase: 'summer',
+    month: 'August 2026',
+    title: 'Showcase Applications & PC Content Lock',
+    subtitle: 'Final summer push before the launch window',
+    cards: [
+      {
+        icon: '🎪',
+        title: 'Showcase applications',
+        body: 'Apply simultaneously to multiple showcases with autumn windows. Day of the Devs, MIX, PC Gaming Show, and Women-Led Games are the priority targets.',
+        tips: [
+          'Apply to Day of the Devs, MIX, PC Gaming Show, Women-Led Games simultaneously',
+          'Slots fill 3–4 months out — August is the edge of the viable window for autumn showcases',
+          'Include playtest testimonials collected during Next Fest in every application',
+          'Research each showcase\'s specific format requirements: some need a build, others only a trailer',
+          'Prepare a 2-minute pitch video in addition to written materials'
+        ],
+        forgotten: [
+          'MIX and Guerrilla Collective are paid showcases (~$600) — budget approval needed before applying',
+          'Women-Led Games requires team eligibility confirmation',
+          'Different showcases have different embargo and announcement rules — read terms before applying'
+        ],
+        caution: ['Showcase acceptance is not guaranteed — do not build launch plans that depend on any single showcase']
+      },
+      {
+        icon: '📅',
+        title: 'Finalize PC content schedule',
+        body: 'Lock the full content calendar for September and beyond. Every asset, post, trailer, and creator drop needs a confirmed date by end of August.',
+        tips: [
+          'Map all planned content against the September launch date — identify gaps',
+          'Confirm trailer schedule: launch trailer, influencer B-roll, PC feature highlight reel',
+          'Brief social team on September cadence: 2 posts per day minimum in launch month',
+          'Identify content requiring developer sign-off and build in review time',
+          'Prepare a launch day runbook: who does what, at what time, on which channel'
+        ],
+        forgotten: [
+          'App store featuring applications for December/winter need to be submitted by end of August',
+          'Press review copy and embargo management logistics need to be confirmed now, not in September'
+        ]
+      },
+      {
+        icon: '💜',
+        title: 'MCL: Showcase consideration',
+        body: 'Evaluate whether to pay for a MIX or Guerrilla Collective showcase slot for MCL alongside the MCNB application. The cost is modest but ROI depends on your current PC userbase size.',
+        tips: [
+          'MIX (~$600) and Guerrilla Collective are accessible price points for indie teams',
+          'A joint MCNB + MCL presence at a showcase reinforces the studio brand',
+          'Evaluate based on MCL PC player growth rate — is there a sufficient PC audience to justify it?'
+        ],
+        isMCL: true
+      }
+    ]
+  },
+
+  sep26: {
+    phase: 'launch',
+    month: 'September 2026',
+    title: 'PC Launch',
+    subtitle: 'Execute the full launch runbook — reviews, influencers, ads, community',
+    cards: [
+      {
+        icon: '📨',
+        title: 'Press & influencer outreach cadence',
+        body: 'Stagger outreach for maximum coverage: influencers get full game keys 2 weeks before launch, press 1.5–2 weeks before, both under embargo until launch day.',
+        tips: [
+          'Send full game keys to Tier 1 influencers 2 weeks before launch date',
+          'Send press keys 1.5–2 weeks before launch with embargo lift = launch day midnight',
+          'Send Tier 2 influencers keys 1 week before with a lighter embargo',
+          'Prepare a press kit update: final screenshots, updated description, review code guidance',
+          'Follow up with non-responders 5 days after sending keys — politely'
+        ],
+        forgotten: [
+          'Steam review copies are distinct from early access keys — confirm the "reviewer" flag is set in Steamworks',
+          'Some outlets need a specific "for review" designation or they may skip coverage',
+          'Influencer agreement on usage rights (can they clip the ending?) must be confirmed in advance'
+        ]
+      },
+      {
+        icon: '📣',
+        title: 'Mobile awareness campaign',
+        body: 'Run a September mobile campaign for the back-to-school audience. Promote new language additions and cross-promote the PC launch to surface the full MCNB ecosystem.',
+        tips: [
+          'Position the campaign around "back to school" emotional resonance — the game\'s themes fit naturally',
+          'Promote any new language additions as a feature hook',
+          'Target mobile players from MCL who have not yet downloaded MCNB',
+          'Maintain 2x daily social posts throughout September'
+        ],
+        forgotten: [
+          'A 2x daily social cadence requires a pre-built content bank — complete before September 1',
+          'Mobile ads should not cannibalise the PC launch message — segment campaigns carefully'
+        ]
+      },
+      {
+        icon: '🏪',
+        title: 'Apply for winter app store events',
+        body: 'Submit featuring requests to iTunes and Google Play for the December/Christmas window now, while the game has launch-window visibility.',
+        tips: [
+          'Apply for iTunes "App of the Day" or Christmas collection — frame around gifting, family, emotional storytelling',
+          'Apply for Google Play featuring in the Live Events / Christmas Town winter event',
+          'Include September launch metrics in the application to demonstrate momentum',
+          'Propose a "live event" or in-game Christmas event to qualify for Google\'s Live Events featuring'
+        ],
+        forgotten: [
+          'Google Play Live Events require a defined in-game event — coordinate with dev team on scope',
+          'Apple featuring applications should be submitted no later than mid-September for December slots'
+        ]
+      },
+      {
+        icon: '💜',
+        title: 'MCL: Back-to-school & winter prep',
+        body: 'Evaluate a back-to-school sale for MCL mobile and PC. Monitor summer campaign performance before deciding — avoid devaluing if the summer campaign is still converting well.',
+        tips: [
+          'If summer campaign momentum is strong, hold off on a mobile sale — discounting cannibalises full-price conversion',
+          'A PC sale for MCL can be evaluated independently',
+          'Begin applying for iTunes/Google featuring for December now if not done in August',
+          'Brief the creative team on December MCL campaign themes for early production start'
+        ],
+        isMCL: true
+      }
+    ]
+  },
+
+  oct26: {
+    phase: 'post',
+    month: 'October 2026',
+    title: 'Update Teasers & Community Warmth',
+    subtitle: 'Sustain post-launch momentum ahead of the year-end update',
+    cards: [
+      {
+        icon: '🔭',
+        title: 'Tease the year-end update',
+        body: 'Use October to seed curiosity about upcoming content. Sneak peeks and cryptic hints keep the community engaged and give press a "coming soon" story angle.',
+        tips: [
+          'Post 1–2 cryptic screenshots or short clips hinting at new content',
+          'Use Discord as the primary first-look channel for community insiders',
+          'Engage community in speculation — "what do you hope to see in the update?" posts',
+          'Prepare a "what\'s coming" devlog for early November — give context to the teases'
+        ],
+        forgotten: [
+          'Do not over-tease — set expectations that match the actual update scope',
+          'Coordinate with dev team on what can safely be shown without spoiling the content'
+        ]
+      }
+    ]
+  },
+
+  nov26: {
+    phase: 'post',
+    month: 'November 2026',
+    title: 'Influencer Outreach & Showcase Confirmation',
+    subtitle: 'Prepare for the December update with content partners confirmed',
+    cards: [
+      {
+        icon: '🎬',
+        title: 'Influencer outreach for the update',
+        body: 'Begin reaching out to influencers for the December update. Late November early access keys give creators time to prepare content to coincide with the update drop.',
+        tips: [
+          'Identify creators who covered the launch who would be natural fits for update coverage',
+          'Explore early access for PC + mobile update content — stagger embargo to maximise coverage window',
+          'Brief creators on the update scope so content is accurate and on-message',
+          'Target "let\'s play the update" format — longer-form content drives more watch time'
+        ],
+        forgotten: [
+          'Creators may have holiday booking blocks in December — confirm availability now',
+          'Early access keys for an update require a separate build flagged correctly in Steamworks'
+        ]
+      },
+      {
+        icon: '✅',
+        title: 'Confirm showcase participation',
+        body: 'Confirm acceptance or rejection from all showcase applications submitted in August, and lock in logistics for any confirmed slots.',
+        tips: [
+          'Follow up with all showcase organisers if no response received',
+          'If confirmed: lock build version, booth logistics, and press list for the showcase',
+          'If rejected: consider a self-hosted livestream as an alternative announcement vehicle',
+          'A confirmed showcase slot can be a PR hook — prepare an announcement post'
+        ]
+      }
+    ]
+  },
+
+  dec26: {
+    phase: 'post',
+    month: 'December 2026',
+    title: 'Winter Update & Year-End Campaign',
+    subtitle: 'Year-end update launch, holiday community events, MCL Christmas push',
+    cards: [
+      {
+        icon: '🎄',
+        title: 'Official update trailer & launch',
+        body: 'Drop the official update trailer and associated content simultaneously. Coordinate PC and mobile update release if the update spans both platforms.',
+        tips: [
+          'Time the trailer drop to coincide with a streaming or showcase slot if confirmed',
+          'Cross-post to all channels simultaneously — social, YouTube, Discord, press',
+          'Feature returning creator content alongside the trailer for credibility',
+          'Include the update in any "best of 2026" pitches to press outlets'
+        ],
+        forgotten: [
+          'Trailer must be uploaded to YouTube and Steam before the drop date — allow 24hrs buffer for processing',
+          'Steam "What\'s New" post should go live same day as the trailer for algorithm boost'
+        ]
+      },
+      {
+        icon: '❄️',
+        title: 'Winter community events & paid campaign',
+        body: 'Run community events around winter holidays to sustain engagement. Evaluate a paid campaign for MCNB based on September–November conversion data.',
+        tips: [
+          'Discord event: community holiday stream or Q&A with developers',
+          'Social event: "share your memory of playing My Child" UGC campaign',
+          'Consider a limited-time cosmetic or in-game decoration if dev resource allows',
+          'If running a paid campaign: focus on holiday gift-giving framing and target wishlisted non-purchasers'
+        ],
+        forgotten: [
+          'Trailer must be uploaded and processed before launch day — allow 24hrs buffer',
+          'Test Steam promoted posts if the organic wishlist-to-purchase rate is below target'
+        ]
+      },
+      {
+        icon: '💜',
+        title: 'MCL: Christmas & New Year campaign',
+        body: 'Run the MCL Christmas/New Year campaign across mobile and PC. This is the highest-traffic period of the year for narrative games.',
+        tips: [
+          'Frame the campaign around "give the gift of emotional storytelling" — gifting season framing',
+          'Run a holiday sale on MCL if not already run in Q3 (avoid devaluing twice in one year)',
+          'Target lapsed users with a "come back for the holidays" re-engagement ad',
+          'Run campaign through January 3 to capture New Year momentum',
+          'Use December performance data to plan the 2027 annual campaign calendar'
+        ],
+        forgotten: [
+          'iOS holiday sale submissions must be approved by Apple — submit by November 25',
+          'Google Play promotional pricing changes require 5–7 day lead time',
+          'End-of-year "best of" lists are submitted by press in early December — pitch MCL for inclusion before Dec 5'
+        ],
+        isMCL: true
+      }
+    ]
+  }
+};
+
+window.openPanel = function(nodeId) {
+  const m = MILESTONES[nodeId];
+  if (!m) return;
+
+  const panel = document.getElementById('detailPanel');
+  const caret = document.getElementById('caretSvg');
+  const container = document.getElementById('panelContainer');
+
+  if (activeNode === nodeId) {
+    panel.classList.remove('open');
+    caret.style.display = 'none';
+    document.querySelectorAll('.node-group').forEach(n => n.classList.remove('active'));
+    activeNode = null;
+    return;
+  }
+
+  activeNode = nodeId;
+  document.querySelectorAll('.node-group').forEach(n => n.classList.remove('active'));
+  document.querySelector('[data-node="' + nodeId + '"]').classList.add('active');
+
+  const idx = NODE_POS[nodeId];
+  const caretLeft = idx * COL_W + COL_W / 2;
+  caret.style.display = 'block';
+  caret.style.left = caretLeft + 'px';
+
+  container.className = 'panel-container ph-' + m.phase;
+
+  function buildCard(card) {
+    const mclClass = card.isMCL ? ' card-mcl' : '';
+    const mclStrip = card.isMCL ? '<div class="mcl-header-strip"><span class="mcl-tag">My Child Lebensborn</span></div>' : '';
+    const forgotten = card.forgotten ? '<div class="forgotten-box"><div class="box-label">⚠ Commonly forgotten</div><ul>' + card.forgotten.map(f => '<li>' + f + '</li>').join('') + '</ul></div>' : '';
+    const caution = card.caution ? '<div class="caution-box"><div class="box-label">! Caution</div><ul>' + card.caution.map(c => '<li>' + c + '</li>').join('') + '</ul></div>' : '';
+    return '<div class="card' + mclClass + '">' +
+      mclStrip +
+      '<div class="card-icon">' + card.icon + '</div>' +
+      '<div class="card-title">' + card.title + '</div>' +
+      '<div class="card-body">' + card.body + '</div>' +
+      '<ul class="tips-list">' + (card.tips || []).map(t => '<li>' + t + '</li>').join('') + '</ul>' +
+      forgotten + caution +
+      '</div>';
+  }
+
+  panel.className = 'detail-panel open';
+  panel.innerHTML =
+    '<button class="close-btn" onclick="window.closePanel()">✕</button>' +
+    '<div class="panel-header">' +
+      '<div class="panel-month">' + m.month + '</div>' +
+      '<div class="panel-title">' + m.title + '</div>' +
+      '<div class="panel-subtitle">' + m.subtitle + '</div>' +
+    '</div>' +
+    '<div class="cards-grid">' + m.cards.map(buildCard).join('') + '</div>';
+
+  setTimeout(function() { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 50);
+};
+
+window.closePanel = function() {
+  document.getElementById('detailPanel').classList.remove('open');
+  document.getElementById('caretSvg').style.display = 'none';
+  document.querySelectorAll('.node-group').forEach(n => n.classList.remove('active'));
+  activeNode = null;
+};
+
+var activeNode = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Phase filter
+  var pills = document.querySelectorAll('.phase-pill');
+  pills.forEach(function(pill) {
+    pill.addEventListener('click', function() {
+      var phase = pill.dataset.phase;
+      if (phase === 'all') {
+        pills.forEach(function(p) { p.classList.add('active'); });
+        document.querySelectorAll('.node-group, .month-cell, .phase-segment').forEach(function(el) { el.classList.remove('dimmed'); });
+      } else {
+        pill.classList.toggle('active');
+        var activePills = Array.from(pills).filter(function(p) { return p.dataset.phase !== 'all' && p.classList.contains('active'); });
+        var allPill = document.querySelector('.phase-pill[data-phase="all"]');
+        if (activePills.length === 0) {
+          pills.forEach(function(p) { p.classList.add('active'); });
+          document.querySelectorAll('.node-group, .month-cell, .phase-segment').forEach(function(el) { el.classList.remove('dimmed'); });
+          return;
+        }
+        allPill.classList.remove('active');
+        var activePhases = activePills.map(function(p) { return p.dataset.phase; });
+        document.querySelectorAll('.node-group[data-phase]').forEach(function(el) {
+          el.classList.toggle('dimmed', activePhases.indexOf(el.dataset.phase) === -1);
+        });
+        document.querySelectorAll('.month-cell').forEach(function(el) {
+          var ph = Array.from(el.classList).find(function(c) { return c.startsWith('ph-'); });
+          if (ph) el.classList.toggle('dimmed', activePhases.indexOf(ph.replace('ph-','')) === -1);
+        });
+        document.querySelectorAll('.phase-segment[data-phase]').forEach(function(el) {
+          el.classList.toggle('dimmed', activePhases.indexOf(el.dataset.phase) === -1);
+        });
+      }
+    });
+  });
+
+  // Drag to scroll
+  var tw = document.getElementById('tw');
+  var isDown = false, startX, scrollLeft;
+  tw.addEventListener('mousedown', function(e) {
+    if (e.target.closest('.node-group') || e.target.closest('.detail-panel') || e.target.closest('.close-btn')) return;
+    isDown = true;
+    startX = e.pageX - tw.offsetLeft;
+    scrollLeft = tw.scrollLeft;
+    tw.style.cursor = 'grabbing';
+  });
+  tw.addEventListener('mouseleave', function() { isDown = false; tw.style.cursor = 'grab'; });
+  tw.addEventListener('mouseup', function() { isDown = false; tw.style.cursor = 'grab'; });
+  tw.addEventListener('mousemove', function(e) {
+    if (!isDown) return;
+    e.preventDefault();
+    var x = e.pageX - tw.offsetLeft;
+    tw.scrollLeft = scrollLeft - (x - startX) * 1.4;
+  });
+});
+</script>
+</body>
+</html>
