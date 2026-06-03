@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PressDesk — Marketing Workspace</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0e0c; --paper: #f5f2ec; --cream: #ede9e0; --surface: #faf8f4;
+  --accent: #c8411b; --accent-soft: #f0d5cc;
+  --teal: #1a6b5e; --teal-soft: #c8e2de;
+  --gold: #b8860b; --gold-soft: #f0e6c4;
+  --purple: #5b3eb8; --purple-soft: #e4dff8;
+  --muted: #8a8070; --border: #d4cfc5; --border-light: #e8e4dc;
+  --sidebar: 200px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Mono',monospace; background:var(--paper); color:var(--ink); height:100vh; display:flex; flex-direction:column; overflow:hidden; font-size:0.75rem; }
+
+/* TOP HEADER */
+header { background:var(--ink); color:var(--paper); padding:0 1rem; display:flex; align-items:center; gap:1.25rem; height:48px; flex-shrink:0; border-bottom:2px solid var(--accent); position:relative; z-index:200; }
+.logo { font-family:'Instrument Serif',serif; font-size:1.2rem; letter-spacing:-0.02em; white-space:nowrap; }
+.logo span { color:var(--accent); font-style:italic; }
+.breadcrumb { display:flex; align-items:center; gap:0.4rem; font-size:0.68rem; color:rgba(245,242,236,0.5); }
+.breadcrumb .sep { opacity:0.3; }
+.breadcrumb .current { color:var(--paper); font-weight:500; }
+.header-search { margin-left:auto; display:flex; align-items:center; gap:0.5rem; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); padding:0.3rem 0.7rem; min-width:200px; }
+.header-search input { font-family:'DM Mono',monospace; font-size:0.7rem; background:transparent; border:none; color:var(--paper); outline:none; width:100%; }
+.header-search input::placeholder { color:rgba(245,242,236,0.35); }
+.kbd { font-size:0.6rem; background:rgba(255,255,255,0.1); padding:0.1rem 0.35rem; border-radius:2px; color:rgba(245,242,236,0.4); }
+.btn-primary { font-family:'DM Mono',monospace; font-size:0.68rem; font-weight:500; text-transform:uppercase; letter-spacing:0.07em; padding:0.4rem 0.85rem; background:var(--accent); color:white; border:none; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.btn-primary:hover { background:#a83418; }
+.btn-secondary { font-family:'DM Mono',monospace; font-size:0.68rem; padding:0.4rem 0.75rem; background:transparent; border:1px solid rgba(255,255,255,0.18); color:rgba(245,242,236,0.7); cursor:pointer; transition:all 0.15s; }
+.btn-secondary:hover { border-color:var(--paper); color:var(--paper); }
+
+/* APP CONTAINER */
+.app { display:flex; flex:1; overflow:hidden; }
+
+/* SIDEBAR */
+.sidebar { width:var(--sidebar); background:var(--cream); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
+.sidebar-section { padding:0.75rem 0; border-bottom:1px solid var(--border-light); }
+.sidebar-section:last-child { border-bottom:none; }
+.sidebar-title { font-size:0.58rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); padding:0 1rem 0.4rem; font-weight:500; }
+.nav-item { display:flex; align-items:center; gap:0.6rem; padding:0.45rem 1rem; font-size:0.72rem; color:var(--ink); cursor:pointer; transition:all 0.12s; border-left:2px solid transparent; }
+.nav-item:hover { background:var(--surface); }
+.nav-item.active { background:var(--accent-soft); border-left-color:var(--accent); color:var(--accent); font-weight:500; }
+.nav-item .nav-count { margin-left:auto; font-size:0.62rem; color:var(--muted); background:var(--surface); padding:0.1rem 0.4rem; border:1px solid var(--border-light); }
+.nav-item.active .nav-count { background:white; border-color:var(--accent); color:var(--accent); }
+
+.campaign-pin { display:flex; align-items:center; gap:0.5rem; padding:0.4rem 1rem; font-size:0.7rem; cursor:pointer; transition:background 0.12s; }
+.campaign-pin:hover { background:var(--surface); }
+.campaign-dot { width:8px; height:8px; flex-shrink:0; }
+.campaign-pin-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* MAIN AREA */
+.main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+/* SUBHEADER */
+.subheader { background:var(--surface); border-bottom:1px solid var(--border); padding:0 1.25rem; display:flex; align-items:center; gap:0.5rem; height:44px; flex-shrink:0; }
+.page-title { font-family:'Instrument Serif',serif; font-size:1.3rem; font-style:italic; color:var(--ink); }
+.page-subtitle { font-size:0.68rem; color:var(--muted); margin-left:0.5rem; padding-left:0.5rem; border-left:1px solid var(--border); }
+
+.toolbar-btn { font-family:'DM Mono',monospace; font-size:0.65rem; padding:0.3rem 0.6rem; background:transparent; border:1px solid var(--border); color:var(--muted); cursor:pointer; display:flex; align-items:center; gap:0.3rem; transition:all 0.15s; }
+.toolbar-btn:hover { border-color:var(--ink); color:var(--ink); background:white; }
+.toolbar-btn.active { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+
+/* VIEW CONTENT */
+.view { flex:1; overflow:auto; display:none; }
+.view.active { display:block; }
+.view-inner { padding:1.25rem; max-width:1500px; margin:0 auto; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:8px; height:8px; }
+::-webkit-scrollbar-track { background:var(--cream); }
+::-webkit-scrollbar-thumb { background:var(--border); }
+::-webkit-scrollbar-thumb:hover { background:var(--muted); }
+
+/* ───────── DASHBOARD ───────── */
+.dashboard-hero { background:var(--ink); color:var(--paper); padding:2rem 2rem 2.5rem; margin:-1.25rem -1.25rem 1.5rem; position:relative; overflow:hidden; }
+.dashboard-hero::before { content:''; position:absolute; top:0; right:0; width:300px; height:100%; background:radial-gradient(circle at center, rgba(200,65,27,0.15), transparent 70%); }
+.hero-eyebrow { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.15em; color:var(--accent); margin-bottom:0.5rem; }
+.hero-title { font-family:'Instrument Serif',serif; font-size:2.5rem; font-style:italic; line-height:1.05; max-width:600px; }
+.hero-subtitle { font-size:0.78rem; color:rgba(245,242,236,0.65); margin-top:0.5rem; max-width:500px; line-height:1.5; }
+
+.dash-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border:1px solid var(--border); margin-bottom:1.5rem; }
+.dash-stat { background:var(--surface); padding:1rem 1.2rem; }
+.dash-stat-label { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:0.25rem; }
+.dash-stat-value { font-family:'Syne',sans-serif; font-size:1.7rem; font-weight:700; line-height:1; }
+.dash-stat-value.accent { color:var(--accent); }
+.dash-stat-value.teal { color:var(--teal); }
+.dash-stat-value.gold { color:var(--gold); }
+.dash-stat-delta { font-size:0.62rem; color:var(--muted); margin-top:0.3rem; }
+
+.dash-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.dash-card { background:var(--surface); border:1px solid var(--border); padding:1rem 1.25rem; }
+.dash-card-title { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:0.75rem; padding-bottom:0.4rem; border-bottom:1px solid var(--border-light); }
+.dash-task-row { display:flex; align-items:center; gap:0.6rem; padding:0.45rem 0; border-bottom:1px solid var(--border-light); cursor:pointer; transition:background 0.12s; padding-left:0.3rem; padding-right:0.3rem; }
+.dash-task-row:hover { background:var(--cream); }
+.dash-task-row:last-child { border-bottom:none; }
+.dash-task-priority-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.dash-task-title { flex:1; font-size:0.72rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dash-task-campaign { font-size:0.62rem; color:var(--muted); padding:0.1rem 0.4rem; background:var(--cream); border:1px solid var(--border-light); }
+.dash-task-due { font-size:0.62rem; color:var(--muted); white-space:nowrap; }
+
+/* ───────── CAMPAIGNS PAGE ───────── */
+.campaigns-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1rem; }
+.campaign-card { background:var(--surface); border:1px solid var(--border); padding:1.25rem; cursor:pointer; transition:all 0.18s; position:relative; overflow:hidden; }
+.campaign-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:var(--accent); }
+.campaign-card:hover { border-color:var(--ink); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.08); }
+.campaign-card-status { display:inline-block; font-size:0.6rem; text-transform:uppercase; letter-spacing:0.1em; padding:0.15rem 0.5rem; background:var(--cream); color:var(--muted); margin-bottom:0.6rem; }
+.campaign-card-status.live { background:var(--teal-soft); color:var(--teal); }
+.campaign-card-status.upcoming { background:var(--gold-soft); color:var(--gold); }
+.campaign-card-status.planning { background:var(--purple-soft); color:var(--purple); }
+.campaign-card-name { font-family:'Instrument Serif',serif; font-size:1.4rem; font-style:italic; line-height:1.15; margin-bottom:0.4rem; }
+.campaign-card-project { font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.75rem; }
+.campaign-card-desc { font-size:0.72rem; color:var(--ink); line-height:1.5; opacity:0.8; margin-bottom:1rem; }
+.campaign-card-meta { display:flex; justify-content:space-between; align-items:center; padding-top:0.75rem; border-top:1px solid var(--border-light); font-size:0.65rem; color:var(--muted); }
+.campaign-progress { background:var(--cream); height:3px; margin:0.5rem 0 0.75rem; position:relative; overflow:hidden; }
+.campaign-progress-bar { background:var(--accent); height:100%; transition:width 0.3s; }
+
+/* ───────── CAMPAIGN DETAIL ───────── */
+.campaign-detail-header { background:var(--ink); color:var(--paper); padding:1.5rem 1.75rem 1.75rem; margin:-1.25rem -1.25rem 1.5rem; position:relative; }
+.back-btn { display:inline-flex; align-items:center; gap:0.4rem; font-size:0.65rem; color:rgba(245,242,236,0.6); cursor:pointer; background:none; border:none; font-family:'DM Mono',monospace; margin-bottom:0.75rem; padding:0; }
+.back-btn:hover { color:var(--paper); }
+.campaign-detail-title { font-family:'Instrument Serif',serif; font-size:2rem; font-style:italic; line-height:1.1; margin-bottom:0.5rem; }
+.campaign-detail-project { font-size:0.7rem; color:rgba(245,242,236,0.55); text-transform:uppercase; letter-spacing:0.1em; }
+.campaign-detail-meta { display:flex; gap:1.5rem; margin-top:1rem; font-size:0.7rem; color:rgba(245,242,236,0.7); flex-wrap:wrap; }
+.campaign-detail-meta span strong { color:var(--paper); }
+
+.detail-tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:1.25rem; }
+.detail-tab { font-family:'DM Mono',monospace; font-size:0.68rem; font-weight:500; text-transform:uppercase; letter-spacing:0.08em; padding:0.6rem 1rem; background:transparent; border:none; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all 0.15s; display:flex; align-items:center; gap:0.4rem; }
+.detail-tab:hover { color:var(--ink); }
+.detail-tab.active { color:var(--ink); border-bottom-color:var(--accent); }
+.detail-tab-count { font-size:0.6rem; background:var(--cream); padding:0.05rem 0.4rem; color:var(--muted); }
+.detail-tab.active .detail-tab-count { background:var(--accent-soft); color:var(--accent); }
+
+.linked-contacts-section { display:none; }
+.linked-contacts-section.active { display:block; }
+
+/* ───────── TASKS TABLE ───────── */
+.tasks-toolbar { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem; }
+
+.tasks-table { width:100%; border-collapse:collapse; font-size:0.72rem; background:var(--surface); border:1px solid var(--border); }
+.tasks-table thead th { background:var(--cream); padding:0.5rem 0.75rem; text-align:left; font-size:0.6rem; font-weight:500; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); border-bottom:1px solid var(--border); white-space:nowrap; cursor:pointer; user-select:none; position:sticky; top:0; z-index:5; }
+.tasks-table tbody tr { border-bottom:1px solid var(--border-light); cursor:pointer; transition:background 0.1s; }
+.tasks-table tbody tr:hover { background:rgba(200,65,27,0.04); }
+.tasks-table tbody td { padding:0.55rem 0.75rem; vertical-align:middle; }
+.tasks-table tbody td.task-title-cell { font-weight:500; font-size:0.74rem; max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.status-pill { display:inline-flex; align-items:center; gap:0.3rem; font-size:0.6rem; font-weight:500; text-transform:uppercase; letter-spacing:0.08em; padding:0.18rem 0.5rem; white-space:nowrap; }
+.status-pill .dot { width:5px; height:5px; border-radius:50%; }
+.status-todo       { background:var(--cream); color:var(--muted); } .status-todo .dot { background:var(--muted); }
+.status-progress   { background:var(--gold-soft); color:var(--gold); } .status-progress .dot { background:var(--gold); }
+.status-review     { background:var(--purple-soft); color:var(--purple); } .status-review .dot { background:var(--purple); }
+.status-done       { background:var(--teal-soft); color:var(--teal); } .status-done .dot { background:var(--teal); }
+.status-blocked    { background:var(--accent-soft); color:var(--accent); } .status-blocked .dot { background:var(--accent); }
+
+.priority-flag { display:inline-block; font-size:0.6rem; font-weight:500; text-transform:uppercase; letter-spacing:0.06em; padding:0.18rem 0.45rem; }
+.priority-high   { color:var(--accent); border:1px solid var(--accent); }
+.priority-medium { color:var(--gold); border:1px solid var(--gold); }
+.priority-low    { color:var(--muted); border:1px solid var(--border); }
+
+.assignee-cell { display:flex; align-items:center; gap:0.4rem; font-size:0.7rem; }
+.avatar { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.6rem; font-weight:600; flex-shrink:0; text-transform:uppercase; color:white; }
+.avatar.sm { width:18px; height:18px; font-size:0.55rem; }
+.avatar.empty { background:none; border:1.5px dashed var(--border); color:var(--muted); }
+
+.linked-count-cell { display:flex; gap:0.4rem; font-size:0.65rem; color:var(--muted); }
+.linked-icon { display:flex; align-items:center; gap:0.2rem; padding:0.15rem 0.4rem; background:var(--cream); border:1px solid var(--border-light); }
+.linked-icon.press { color:var(--teal); }
+.linked-icon.creator { color:var(--purple); }
+.linked-icon strong { color:var(--ink); font-weight:600; }
+
+.date-cell { font-size:0.68rem; color:var(--muted); white-space:nowrap; }
+.date-cell.overdue { color:var(--accent); font-weight:500; }
+
+/* ───────── CONTACTS TABLE ───────── */
+.contacts-table { width:100%; border-collapse:collapse; font-size:0.72rem; background:var(--surface); border:1px solid var(--border); }
+.contacts-table thead th { background:var(--cream); padding:0.5rem 0.75rem; text-align:left; font-size:0.6rem; font-weight:500; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); border-bottom:1px solid var(--border); cursor:pointer; position:sticky; top:0; z-index:5; }
+.contacts-table tbody tr { border-bottom:1px solid var(--border-light); cursor:pointer; transition:background 0.1s; }
+.contacts-table tbody tr:hover { background:rgba(200,65,27,0.04); }
+.contacts-table tbody td { padding:0.5rem 0.75rem; vertical-align:middle; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.name-cell { display:flex; align-items:center; gap:0.5rem; }
+.contact-name { font-weight:500; font-size:0.74rem; }
+.contact-name-sub { font-size:0.62rem; color:var(--muted); margin-top:0.05rem; }
+
+/* TAG STYLES */
+.tag { display:inline-flex; align-items:center; font-size:0.6rem; padding:0.18rem 0.5rem; font-weight:500; white-space:nowrap; margin-right:0.2rem; }
+.lang-en { background:#dbeafe; color:#1e40af; }
+.lang-ar { background:#fef3c7; color:#92400e; }
+.lang-fr { background:#ede9fe; color:#5b21b6; }
+.lang-pt { background:#dcfce7; color:#166534; }
+.lang-no { background:#fee2e2; color:#991b1b; }
+.lang-ja { background:#fce7f3; color:#9d174d; }
+.lang-es { background:#ffedd5; color:#9a3412; }
+.lang-en, .lang-ar, .lang-fr, .lang-pt, .lang-no, .lang-ja, .lang-es { /* lang tag base */ }
+
+.platform-xbox  { background:#107c10; color:white; font-weight:600; }
+.platform-steam { background:#1b2838; color:white; font-weight:600; }
+.platform-switch { background:#e4000f; color:white; font-weight:600; }
+.platform-ps   { background:#003791; color:white; font-weight:600; }
+
+.platform-yt    { background:#ff0000; color:white; font-weight:600; }
+.platform-twitch{ background:#9146ff; color:white; font-weight:600; }
+.platform-tiktok{ background:#000; color:white; font-weight:600; }
+.platform-twitter{ background:#1da1f2; color:white; font-weight:600; }
+.platform-ig    { background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color:white; font-weight:600; }
+
+.dash { color:var(--border); font-size:0.8rem; }
+
+/* GROUP HEADER */
+.group-header td { background:var(--surface); padding:0.5rem 0.75rem; border-bottom:1px solid var(--border-light); border-top:2px solid var(--border); }
+.group-label { display:flex; align-items:center; gap:0.5rem; font-size:0.65rem; font-weight:600; text-transform:uppercase; letter-spacing:0.09em; }
+.group-toggle { background:none; border:none; cursor:pointer; color:var(--muted); font-size:0.65rem; padding:0 0.2rem; transition:transform 0.15s; }
+.group-toggle.collapsed { transform:rotate(-90deg); }
+.group-status-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.group-count { font-size:0.6rem; background:var(--cream); border:1px solid var(--border); padding:0.05rem 0.4rem; color:var(--muted); margin-left:0.25rem; }
+
+/* ───────── SLIDE-IN DETAIL PANEL ───────── */
+.panel-overlay { display:none; position:fixed; inset:0; z-index:300; }
+.panel-overlay.open { display:block; }
+.panel-backdrop { position:absolute; inset:0; background:rgba(15,14,12,0.35); }
+.panel { position:absolute; right:0; top:0; bottom:0; width:480px; background:var(--surface); border-left:1px solid var(--border); overflow-y:auto; animation:slideIn 0.22s ease; box-shadow:-8px 0 32px rgba(0,0,0,0.12); }
+@keyframes slideIn { from{transform:translateX(24px);opacity:0;} to{transform:translateX(0);opacity:1;} }
+.panel-header { background:var(--ink); color:var(--paper); padding:1.25rem; display:flex; align-items:flex-start; justify-content:space-between; position:sticky; top:0; z-index:10; }
+.panel-name { font-family:'Instrument Serif',serif; font-size:1.4rem; font-style:italic; line-height:1.15; }
+.panel-sub { font-size:0.7rem; color:rgba(245,242,236,0.55); margin-top:0.25rem; }
+.close-btn { width:28px; height:28px; background:rgba(255,255,255,0.08); border:none; color:var(--paper); cursor:pointer; font-size:0.95rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.15s; }
+.close-btn:hover { background:rgba(255,255,255,0.18); }
+.panel-body { padding:1.25rem; }
+.panel-section { margin-bottom:1.5rem; }
+.panel-section-title { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); padding-bottom:0.4rem; border-bottom:1px solid var(--border); margin-bottom:0.6rem; display:flex; justify-content:space-between; align-items:center; }
+.panel-section-action { font-size:0.62rem; color:var(--accent); cursor:pointer; background:none; border:none; font-family:'DM Mono',monospace; text-transform:none; letter-spacing:normal; }
+.panel-section-action:hover { text-decoration:underline; }
+.panel-field { display:flex; gap:1rem; margin-bottom:0.55rem; font-size:0.72rem; align-items:flex-start; }
+.panel-key { width:100px; flex-shrink:0; color:var(--muted); padding-top:1px; }
+.panel-val { color:var(--ink); line-height:1.45; flex:1; }
+.panel-notes { font-family:'DM Mono',monospace; font-size:0.72rem; width:100%; min-height:80px; padding:0.6rem; background:var(--paper); border:1px solid var(--border); color:var(--ink); resize:vertical; outline:none; line-height:1.5; }
+.panel-notes:focus { border-color:var(--accent); }
+.status-chip { font-family:'DM Mono',monospace; font-size:0.6rem; font-weight:500; text-transform:uppercase; letter-spacing:0.07em; padding:0.22rem 0.55rem; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; transition:all 0.15s; margin-right:0.3rem; margin-bottom:0.3rem; }
+.status-chip.active, .status-chip:hover { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+
+/* LINKED ITEMS LIST IN PANEL */
+.linked-item { display:flex; align-items:center; gap:0.6rem; padding:0.55rem 0; border-bottom:1px solid var(--border-light); font-size:0.72rem; cursor:pointer; }
+.linked-item:hover .linked-item-name { color:var(--accent); }
+.linked-item:last-child { border-bottom:none; }
+.linked-item-info { flex:1; overflow:hidden; }
+.linked-item-name { font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transition:color 0.15s; }
+.linked-item-sub { font-size:0.62rem; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:0.1rem; }
+.linked-item-remove { background:none; border:none; cursor:pointer; color:var(--muted); font-size:0.85rem; padding:0.2rem 0.4rem; transition:color 0.15s; }
+.linked-item-remove:hover { color:var(--accent); }
+
+/* LINK PICKER */
+.link-picker { position:relative; }
+.link-picker-input { font-family:'DM Mono',monospace; font-size:0.72rem; padding:0.5rem 0.7rem; width:100%; background:var(--paper); border:1px solid var(--border); outline:none; }
+.link-picker-input:focus { border-color:var(--accent); }
+.link-picker-dropdown { position:absolute; top:100%; left:0; right:0; background:var(--surface); border:1px solid var(--border); border-top:none; max-height:200px; overflow-y:auto; z-index:50; display:none; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+.link-picker-dropdown.open { display:block; }
+.link-picker-result { padding:0.5rem 0.7rem; cursor:pointer; font-size:0.7rem; border-bottom:1px solid var(--border-light); display:flex; align-items:center; gap:0.5rem; }
+.link-picker-result:hover { background:var(--cream); }
+.link-picker-empty { padding:0.75rem; font-size:0.68rem; color:var(--muted); text-align:center; }
+
+/* ───────── MODAL ───────── */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,14,12,0.6); z-index:500; backdrop-filter:blur(2px); align-items:flex-start; justify-content:center; padding-top:5vh; }
+.modal-overlay.open { display:flex; animation:fadeIn 0.18s ease; }
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+.modal { background:var(--surface); border:1px solid var(--border); width:620px; max-width:95vw; max-height:88vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.28); animation:modalUp 0.22s ease; }
+@keyframes modalUp { from{opacity:0;transform:translateY(-12px) scale(0.98);} to{opacity:1;transform:translateY(0) scale(1);} }
+.modal-header { background:var(--ink); color:var(--paper); padding:1rem 1.25rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5; }
+.modal-title { font-family:'Instrument Serif',serif; font-size:1.15rem; font-style:italic; }
+.modal-body { padding:1.25rem; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+.form-row.full { grid-template-columns:1fr; }
+.form-group { display:flex; flex-direction:column; gap:0.3rem; }
+.form-label { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); }
+.form-input, .form-select, .form-textarea { font-family:'DM Mono',monospace; font-size:0.74rem; padding:0.5rem 0.7rem; background:var(--paper); border:1px solid var(--border); color:var(--ink); outline:none; transition:border-color 0.15s; width:100%; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--accent); }
+.form-textarea { resize:vertical; min-height:70px; line-height:1.4; }
+.modal-footer { background:var(--cream); border-top:1px solid var(--border); padding:0.85rem 1.25rem; display:flex; justify-content:flex-end; gap:0.75rem; position:sticky; bottom:0; }
+.btn-cancel { font-family:'DM Mono',monospace; font-size:0.68rem; padding:0.45rem 0.9rem; background:transparent; border:1px solid var(--border); color:var(--muted); cursor:pointer; transition:all 0.15s; }
+.btn-cancel:hover { border-color:var(--ink); color:var(--ink); }
+
+/* TOAST */
+.toast-wrap { position:fixed; bottom:1.5rem; right:1.5rem; z-index:999; display:flex; flex-direction:column; gap:0.5rem; pointer-events:none; }
+.toast { background:var(--ink); color:var(--paper); padding:0.5rem 0.85rem; font-size:0.68rem; border-left:3px solid var(--accent); animation:toastIn 0.2s ease; }
+@keyframes toastIn { from{opacity:0;transform:translateX(16px);} to{opacity:1;transform:translateX(0);} }
+
+/* MOBILE */
+@media (max-width: 900px) {
+  .sidebar { display:none; }
+  .dash-stats { grid-template-columns:repeat(2,1fr); }
+  .dash-grid { grid-template-columns:1fr; }
+  .form-row { grid-template-columns:1fr; }
+}
+
+/* EMPTY STATE */
+.empty-state { text-align:center; padding:3rem 2rem; color:var(--muted); font-size:0.78rem; background:var(--surface); border:1px dashed var(--border); }
+.empty-state .empty-icon { font-size:1.8rem; margin-bottom:0.5rem; opacity:0.4; }
+
+/* CHIP for assigned contact list */
+.chip { display:inline-flex; align-items:center; gap:0.3rem; font-size:0.65rem; padding:0.15rem 0.45rem; background:var(--cream); border:1px solid var(--border-light); margin-right:0.3rem; margin-bottom:0.3rem; }
+</style>
+</head>
+<body>
+
+<!-- ───────── HEADER ───────── -->
+<header>
+  <div class="logo">Press<span>Desk</span></div>
+  <div class="breadcrumb" id="breadcrumb">
+    <span>Workspace</span>
+    <span class="sep">/</span>
+    <span class="current" id="bc-current">Dashboard</span>
+  </div>
+  <div class="header-search">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" placeholder="Search anything..." id="globalSearch">
+    <span class="kbd">⌘K</span>
+  </div>
+  <button class="btn-secondary" onclick="showToast('Settings coming soon')">Settings</button>
+  <button class="btn-primary" onclick="openQuickAdd()">+ Quick Add</button>
+</header>
+
+<!-- ───────── APP BODY ───────── -->
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Workspace</div>
+      <div class="nav-item active" data-view="dashboard" onclick="switchView('dashboard')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-view="campaigns" onclick="switchView('campaigns')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+        Campaigns
+        <span class="nav-count" id="navCount-campaigns">0</span>
+      </div>
+      <div class="nav-item" data-view="tasks" onclick="switchView('tasks')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 11l3 3L22 4"/></svg>
+        All Tasks
+        <span class="nav-count" id="navCount-tasks">0</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Contacts</div>
+      <div class="nav-item" data-view="press" onclick="switchView('press')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6z"/></svg>
+        Press / Journalists
+        <span class="nav-count" id="navCount-press">0</span>
+      </div>
+      <div class="nav-item" data-view="influencers" onclick="switchView('influencers')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        Creators / Influencers
+        <span class="nav-count" id="navCount-influencers">0</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Pinned Campaigns</div>
+      <div id="pinnedCampaigns"></div>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+    <!-- SUBHEADER -->
+    <div class="subheader">
+      <div class="page-title" id="pageTitle">Dashboard</div>
+      <div class="page-subtitle" id="pageSubtitle"></div>
+      <div style="margin-left:auto;display:flex;gap:0.4rem" id="pageActions"></div>
+    </div>
+
+    <!-- VIEWS -->
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="view-inner">
+        <div class="dashboard-hero">
+          <div class="hero-eyebrow">My Child: New Beginnings · Demo Live</div>
+          <div class="hero-title">June at full tilt.<br>Demo, sale, Next Fest.</div>
+          <div class="hero-subtitle">NB Demo launched June 3. Lebensborn 50% off through June 18. Next Fest kicks off June 15. Summer Sale post June 25.</div>
+        </div>
+
+        <div class="dash-stats" id="dashStats"></div>
+
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="dash-card-title">Upcoming Tasks</div>
+            <div id="upcomingTasks"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-title">Active Campaigns</div>
+            <div id="activeCampaigns"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAMPAIGNS -->
+    <div class="view" id="view-campaigns">
+      <div class="view-inner">
+        <div class="campaigns-grid" id="campaignsGrid"></div>
+      </div>
+    </div>
+
+    <!-- CAMPAIGN DETAIL -->
+    <div class="view" id="view-campaign-detail">
+      <div class="view-inner" id="campaignDetailContent"></div>
+    </div>
+
+    <!-- ALL TASKS -->
+    <div class="view" id="view-tasks">
+      <div class="view-inner">
+        <div class="tasks-toolbar">
+          <select class="form-select" id="taskFilterCampaign" onchange="renderTasksTable()" style="max-width:200px">
+            <option value="">All Campaigns</option>
+          </select>
+          <select class="form-select" id="taskFilterStatus" onchange="renderTasksTable()" style="max-width:140px">
+            <option value="">All Statuses</option>
+            <option>To Do</option><option>In Progress</option><option>Review</option><option>Done</option><option>Blocked</option>
+          </select>
+          <select class="form-select" id="taskFilterPriority" onchange="renderTasksTable()" style="max-width:140px">
+            <option value="">All Priorities</option>
+            <option>High</option><option>Medium</option><option>Low</option>
+          </select>
+        </div>
+        <table class="tasks-table" id="tasksMainTable">
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Campaign</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Assignee</th>
+              <th>Due</th>
+              <th>Linked</th>
+            </tr>
+          </thead>
+          <tbody id="tasksMainBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PRESS CONTACTS -->
+    <div class="view" id="view-press">
+      <div class="view-inner">
+        <table class="contacts-table">
+          <thead>
+            <tr>
+              <th style="width:240px">Name</th>
+              <th style="width:170px">Email</th>
+              <th style="width:160px">Publication</th>
+              <th style="width:110px">Language</th>
+              <th style="width:110px">Region</th>
+              <th style="width:150px">Platforms</th>
+              <th style="width:120px">Linked Campaigns</th>
+            </tr>
+          </thead>
+          <tbody id="pressTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- INFLUENCER CONTACTS -->
+    <div class="view" id="view-influencers">
+      <div class="view-inner">
+        <table class="contacts-table">
+          <thead>
+            <tr>
+              <th style="width:220px">Creator</th>
+              <th style="width:160px">Platform / Handle</th>
+              <th style="width:100px">Followers</th>
+              <th style="width:140px">Niche</th>
+              <th style="width:100px">Region</th>
+              <th style="width:170px">Email</th>
+              <th style="width:120px">Linked Campaigns</th>
+            </tr>
+          </thead>
+          <tbody id="influencerTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ───────── DETAIL PANEL ───────── -->
+<div class="panel-overlay" id="panelOverlay">
+  <div class="panel-backdrop" onclick="closePanel()"></div>
+  <div class="panel" id="panel"></div>
+</div>
+
+<!-- ───────── MODAL ───────── -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ════════════════ DATA ════════════════ */
+
+const STATUS_TASK = {
+  'To Do':       { cls:'status-todo',     color:'#8a8070' },
+  'In Progress': { cls:'status-progress', color:'#b8860b' },
+  'Review':      { cls:'status-review',   color:'#5b3eb8' },
+  'Done':        { cls:'status-done',     color:'#1a6b5e' },
+  'Blocked':     { cls:'status-blocked',  color:'#c8411b' },
+};
+
+const STATUS_CAMPAIGN = {
+  'Planning':  { cls:'planning', color:'#5b3eb8' },
+  'Upcoming':  { cls:'upcoming', color:'#b8860b' },
+  'Live':      { cls:'live',     color:'#1a6b5e' },
+  'Archived':  { cls:'',         color:'#8a8070' },
+};
+
+const STATUS_CONTACT = {
+  'Active':     '#1a6b5e',
+  'New Entry':  '#5b3eb8',
+  'Incomplete': '#c8411b',
+  'Cold':       '#b8860b',
+  'Blacklist':  '#8a8070',
+};
+
+let campaigns = [
+  // ───── ACTIVE SAREPTA CAMPAIGNS ─────
+  { id:1,  name:'MCNB Demo Launch',           project:'My Child: New Beginnings', status:'Live',     startDate:'2026-06-03', endDate:'2026-06-15', description:'Demo goes live June 3. Cross-promo with Lebensborn Steam page, key distribution, Tier 2 + Tier 1 creator outreach waves leading into Steam Next Fest.', color:'#c8411b' },
+  { id:2,  name:'Lebensborn Discount + Summer Sale', project:'My Child Lebensborn',      status:'Live',     startDate:'2026-06-04', endDate:'2026-06-30', description:'50% off discount campaign (4–18 June) plus Summer Sale push on June 25. Cross-promoted with MCNB demo on Steam.', color:'#1a6b5e' },
+  { id:3,  name:'MCNB Steam Next Fest',       project:'My Child: New Beginnings', status:'Upcoming', startDate:'2026-06-15', endDate:'2026-06-22', description:'Steam Next Fest event positioning — broadcast live on Steam page, daily content schedule, cross-promotion to demo page.', color:'#5b3eb8' },
+  { id:4,  name:'MCNB Summer Push',           project:'My Child: New Beginnings', status:'Planning', startDate:'2026-07-01', endDate:'2026-08-31', description:'Post-Next-Fest momentum push: weekly Steam updates, wishlist drive, summer creator wave outreach.', color:'#b8860b' },
+  { id:5,  name:'MCNB Showcases & Content',   project:'My Child: New Beginnings', status:'Planning', startDate:'2026-08-15', endDate:'2026-09-30', description:'Q3 showcase submissions (gamescom-adjacent), showcase trailer cut, paid content slots.', color:'#1e6fa8' },
+  { id:6,  name:'MCNB PC Launch',             project:'My Child: New Beginnings', status:'Upcoming', startDate:'2026-10-01', endDate:'2026-10-31', description:'PC launch month. Launch trailer, press review embargo, day-of Steam posts with Lebensborn cross-promo, creator broadcast coordination.', color:'#7c4a8c' },
+  { id:7,  name:'MCNB Update Teasers',        project:'My Child: New Beginnings', status:'Planning', startDate:'2026-10-15', endDate:'2026-11-15', description:'Post-launch update teaser campaign + content roadmap announcement.', color:'#a83418' },
+  { id:8,  name:'MCNB Influencer & Confirms', project:'My Child: New Beginnings', status:'Planning', startDate:'2026-11-01', endDate:'2026-11-30', description:'Q4 creator broadcast confirmations + long-form review followups.', color:'#2a7a4b' },
+  { id:9,  name:'MCNB Winter Update',         project:'My Child: New Beginnings', status:'Planning', startDate:'2026-12-01', endDate:'2026-12-31', description:'Winter update announcement + year-end recap.', color:'#1e6fa8' },
+  // ───── OTHER STUDIO WORK ─────
+  { id:10, name:'Builder & Son — Steam Next Fest (Feb 2028)', project:'Builder & Son', status:'Planning', startDate:'2028-01-15', endDate:'2028-02-15', description:'Demo launch event positioning Builder & Son for chasm-crossing into Jenny mainstream audience.', color:'#c8411b' },
+  { id:11, name:'Builder & Son — Wholesome Direct',  project:'Builder & Son', status:'Live',     startDate:'2025-11-01', endDate:'2026-04-30', description:'Submission and follow-through for Wholesome Direct 2026 spotlight.', color:'#1a6b5e' },
+  { id:12, name:'Investor Update — Q2',              project:'Studio Ops',    status:'Upcoming', startDate:'2026-04-01', endDate:'2026-06-30', description:'Investor-facing materials including fund application investment case for Builder & Son.', color:'#b8860b' },
+];
+
+let tasks = [
+  // ═══════ MCNB DEMO LAUNCH (Campaign 1) — From Hypotyposis meeting 3 June 2026 ═══════
+  { id:1,  campaignId:1, title:'New Beginnings Demo goes live on Steam',           status:'Done',        priority:'High',   assignee:'E.', dueDate:'2026-06-03', notes:'Demo live on Steam page. Confirm visibility, check store listing renders correctly.', pressIds:[], influencerIds:[] },
+  { id:2,  campaignId:1, title:'Send Sarepta 100 keys for each platform',          status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-06-04', notes:'100 keys per platform — coordinate with publishing partner for delivery.', pressIds:[], influencerIds:[] },
+  { id:3,  campaignId:1, title:'TT2 Creator Outreach — NB Demo',                   status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-06-04', notes:'Tier 2 broader creator outreach wave. Cozy/sim/narrative niches.', pressIds:[], influencerIds:[2,4,5,7,8,10] },
+  { id:4,  campaignId:1, title:'NB Demo Steam Post + LB cross-promo',              status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-06-05', notes:'Steam post on NB demo with cross-promo link to Lebensborn Steam page.', pressIds:[], influencerIds:[] },
+  { id:5,  campaignId:1, title:'Include Lebensborn key in creator offerings',      status:'To Do',       priority:'Medium', assignee:'E.', dueDate:'2026-06-06', notes:'Bundle LB key with NB demo key for creators — adds value to outreach.', pressIds:[], influencerIds:[] },
+  { id:6,  campaignId:1, title:'T1 Creator Outreach — NB Demo',                    status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-06-09', notes:'Tier 1 top-priority creator outreach. Personalized pitches only — reference each creator\'s last narrative/cozy coverage.', pressIds:[], influencerIds:[1,3,7] },
+
+  // ═══════ LEBENSBORN DISCOUNT + SUMMER SALE (Campaign 2) ═══════
+  { id:7,  campaignId:2, title:'Lebensborn Steam Post — Discount + NB Demo cross-promo', status:'Done',  priority:'High',   assignee:'E.', dueDate:'2026-06-03', notes:'Posted on LB Steam page announcing upcoming 50% off + cross-promo to NB demo.', pressIds:[], influencerIds:[] },
+  { id:8,  campaignId:2, title:'50% Off Sale starts',                              status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-06-04', notes:'Lebensborn 50% off campaign begins. Runs 4–18 June.', pressIds:[], influencerIds:[] },
+  { id:9,  campaignId:2, title:'50% Off Sale ends',                                status:'To Do',       priority:'Medium', assignee:'E.', dueDate:'2026-06-18', notes:'Sale window closes. Pull performance numbers for retro.', pressIds:[], influencerIds:[] },
+  { id:10, campaignId:2, title:'Summer Sale — Steam post (NB + LB pages)',         status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-06-25', notes:'Post on BOTH NB and LB Steam pages announcing Lebensborn 50% off for the Summer Sale.', pressIds:[], influencerIds:[] },
+
+  // ═══════ MCNB STEAM NEXT FEST (Campaign 3) ═══════
+  { id:11, campaignId:3, title:'Steam Post — NB in Next Fest + cross-promo to Demo page', status:'To Do', priority:'High',  assignee:'E.', dueDate:'2026-06-15', notes:'Day-of Next Fest opening. Steam announcement post with link back to demo.', pressIds:[], influencerIds:[] },
+  { id:12, campaignId:3, title:'Set NB Broadcast live on Steam Page',              status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-06-15', notes:'Configure Steam broadcast settings. Confirm stream key & schedule.', pressIds:[], influencerIds:[] },
+  { id:13, campaignId:3, title:'Daily Next Fest streaming schedule',               status:'To Do',       priority:'Medium', assignee:'E.', dueDate:'2026-06-16', notes:'Confirm dev/community stream slots across the week.', pressIds:[], influencerIds:[] },
+  { id:14, campaignId:3, title:'Mid-Next-Fest performance check-in',               status:'To Do',       priority:'Medium', assignee:'E.', dueDate:'2026-06-19', notes:'Pull wishlist & demo download numbers. Adjust messaging if needed.', pressIds:[], influencerIds:[] },
+  { id:15, campaignId:3, title:'Next Fest wrap-up post',                           status:'To Do',       priority:'Medium', assignee:'E.', dueDate:'2026-06-22', notes:'Thank-you post + tease what\'s next leading into Summer Push.', pressIds:[], influencerIds:[] },
+
+  // ═══════ MCNB SUMMER PUSH (Campaign 4) ═══════
+  { id:16, campaignId:4, title:'Plan summer content calendar',                     status:'To Do',       priority:'Medium', assignee:'E.', dueDate:'2026-07-05', notes:'Weekly cadence for July–August. Mix of dev updates, lore drops, community spotlights.', pressIds:[], influencerIds:[] },
+  { id:17, campaignId:4, title:'Weekly dev updates on Steam (kickoff)',            status:'To Do',       priority:'Medium', assignee:'E.', dueDate:'2026-07-15', notes:'First post in the weekly cadence. Establishes rhythm pre-launch.', pressIds:[], influencerIds:[] },
+  { id:18, campaignId:4, title:'Summer creator wave outreach',                     status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-07-20', notes:'Second creator wave with updated demo build + LB key bundle.', pressIds:[], influencerIds:[] },
+  { id:19, campaignId:4, title:'Wishlist drive campaign',                          status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-08-01', notes:'Targeted wishlist push leading into showcases. Coordinate paid + organic.', pressIds:[], influencerIds:[] },
+
+  // ═══════ MCNB SHOWCASES & CONTENT (Campaign 5) ═══════
+  { id:20, campaignId:5, title:'Identify Q3 showcase submissions',                 status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-08-15', notes:'gamescom-adjacent events, IGN Live, Future Games Show, Wholesome follow-ups.', pressIds:[], influencerIds:[] },
+  { id:21, campaignId:5, title:'Cut showcase trailer',                             status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-08-25', notes:'~60s showcase-ready cut. Re-usable across multiple events.', pressIds:[], influencerIds:[] },
+  { id:22, campaignId:5, title:'Submit to gamescom-adjacent events',               status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-09-01', notes:'Hit submission deadlines. Confirm slot bookings.', pressIds:[], influencerIds:[] },
+
+  // ═══════ MCNB PC LAUNCH (Campaign 6) ═══════
+  { id:23, campaignId:6, title:'Launch trailer cut',                               status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-09-25', notes:'Hero launch trailer — lean into emotional beats. ~90s.', pressIds:[], influencerIds:[] },
+  { id:24, campaignId:6, title:'Press review embargo coordination',                status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-10-01', notes:'Send embargoed review keys 2 weeks before launch. Coordinate lift time.', pressIds:[27,28,29,30,3], influencerIds:[] },
+  { id:25, campaignId:6, title:'Launch day Steam post + LB cross-promo',           status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-10-15', notes:'Coordinated launch posts on NB and LB Steam pages.', pressIds:[], influencerIds:[] },
+  { id:26, campaignId:6, title:'Launch day creator broadcasts coordination',       status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-10-15', notes:'Confirm Tier 1 creators streaming launch day. Provide assets pack.', pressIds:[], influencerIds:[1,3,7] },
+
+  // ═══════ MCNB UPDATE TEASERS (Campaign 7) ═══════
+  { id:27, campaignId:7, title:'First post-launch update teaser',                  status:'To Do',       priority:'Medium', assignee:'E.', dueDate:'2026-10-30', notes:'Tease first content update. Build retention narrative.', pressIds:[], influencerIds:[] },
+  { id:28, campaignId:7, title:'Content roadmap announcement',                     status:'To Do',       priority:'Medium', assignee:'E.', dueDate:'2026-11-10', notes:'Public roadmap for post-launch content. Investor-friendly signal.', pressIds:[], influencerIds:[] },
+
+  // ═══════ MCNB INFLUENCER & CONFIRMS (Campaign 8) ═══════
+  { id:29, campaignId:8, title:'Confirm Q4 creator broadcasts',                    status:'To Do',       priority:'High',   assignee:'E.', dueDate:'2026-11-15', notes:'Lock in November & December creator schedule.', pressIds:[], influencerIds:[] },
+  { id:30, campaignId:8, title:'Long-form review followups',                       status:'To Do',       priority:'Medium', assignee:'E.', dueDate:'2026-11-20', notes:'Pitch retrospective long-reads to Eurogamer, Wired, Bloomberg.', pressIds:[27,29,30], influencerIds:[] },
+
+  // ═══════ MCNB WINTER UPDATE (Campaign 9) ═══════
+  { id:31, campaignId:9, title:'Winter update announcement',                       status:'To Do',       priority:'Medium', assignee:'E.', dueDate:'2026-12-05', notes:'Announce winter update content + holiday-themed beats.', pressIds:[], influencerIds:[] },
+  { id:32, campaignId:9, title:'Year-end recap post',                              status:'To Do',       priority:'Low',    assignee:'E.', dueDate:'2026-12-15', notes:'Community-facing recap post.', pressIds:[], influencerIds:[] },
+
+  // ═══════ BUILDER & SON (Campaign 10–11) ═══════
+  { id:33, campaignId:10, title:'Finalize Steam capsule art variants',             status:'In Progress', priority:'Medium', assignee:'E.', dueDate:'2026-08-10', notes:'A/B test 3 capsule directions before locking. Long lead time before Feb 2028.', pressIds:[], influencerIds:[] },
+  { id:34, campaignId:10, title:'Wishlist driver trailer cut',                     status:'To Do',       priority:'Medium', assignee:'E.', dueDate:'2026-09-20', notes:'~60s, leaning into Majid persona hook for early adopters.', pressIds:[], influencerIds:[] },
+  { id:35, campaignId:11, title:'Wholesome Direct follow-up',                      status:'In Progress', priority:'Medium', assignee:'E.', dueDate:'2026-06-15', notes:'Ping mid-June. They acknowledged receipt earlier.', pressIds:[], influencerIds:[1,5] },
+
+  // ═══════ INVESTOR UPDATE Q2 (Campaign 12) ═══════
+  { id:36, campaignId:12, title:'Update fund application slide deck',              status:'In Progress', priority:'High',   assignee:'E.', dueDate:'2026-06-09', notes:'Confirmed-vs-estimated split, market-structure argument replacing CAGR figure.', pressIds:[], influencerIds:[] },
+  { id:37, campaignId:12, title:'SWOT visual — investor-ready',                    status:'Review',      priority:'Medium', assignee:'E.', dueDate:'2026-06-07', notes:'Iterating on visually distinct versions.', pressIds:[], influencerIds:[] },
+];
+
+let pressContacts = [
+  {id:1, name:'Ana Diaz',           status:'Incomplete', email:'',                       publication:'Polygon',           language:'',           region:'',              platform:'',            lastContacted:'', notes:''},
+  {id:2, name:'Baraa Elanany',      status:'Incomplete', email:'',                       publication:'Games Mix',          language:'Arabic',     region:'MENA',          platform:'',            lastContacted:'', notes:''},
+  {id:3, name:'Brendan Lowry',      status:'Active',     email:'blowry@windowscentral.com',publication:'Windows Central', language:'English',    region:'North America', platform:'Xbox,Steam',  lastContacted:'2026-05-22', notes:'Strong Xbox beat. Reviews indie tier 2 regularly.'},
+  {id:5, name:'Cass Marshall',      status:'New Entry',  email:'cmarshall@polygon.com',  publication:'Polygon',           language:'English',    region:'North America', platform:'',            lastContacted:'', notes:''},
+  {id:13,name:'Maher Maysara',      status:'New Entry',  email:'mmaysara@vga4a.com',     publication:'vga4a',             language:'Arabic',     region:'MENA',          platform:'',            lastContacted:'', notes:''},
+  {id:15,name:'Oliver Roderick',    status:'New Entry',  email:'oliver@switchplayer.net',publication:'Switch Player',     language:'English',    region:'UK',            platform:'Switch',      lastContacted:'', notes:''},
+  {id:18,name:'Régis Monterrin',    status:'Incomplete', email:'',                       publication:'jeuxvideo.com',     language:'French',     region:'France',        platform:'',            lastContacted:'', notes:''},
+  {id:21,name:'Thomas Pillon',      status:'New Entry',  email:'tpillon@gameblog.fr',    publication:'gameblog.fr',       language:'French',     region:'France',        platform:'Switch',      lastContacted:'', notes:''},
+  {id:27,name:'Jason Schreier',     status:'Active',     email:'jschreier@bloomberg.com',publication:'Bloomberg',         language:'English',    region:'North America', platform:'',            lastContacted:'2026-05-25', notes:'Top-tier. Covers studio culture, industry, labor.'},
+  {id:28,name:'Laura Kate Dale',    status:'Active',     email:'lkd@kotaku.co.uk',       publication:'Kotaku UK',         language:'English',    region:'UK',            platform:'Switch,Steam',lastContacted:'2026-05-18', notes:'Nintendo & indie specialist.'},
+  {id:29,name:'Cecilia D\'Anastasio',status:'Active',    email:'cecilia@wired.com',      publication:'Wired',             language:'English',    region:'North America', platform:'',            lastContacted:'2026-05-20', notes:'Long-form features. Game industry analysis.'},
+  {id:30,name:'Christian Donlan',   status:'Active',     email:'cdonlan@eurogamer.net',  publication:'Eurogamer',         language:'English',    region:'UK',            platform:'',            lastContacted:'2026-05-15', notes:'Reflective long-form pieces. Loves cozy/atmospheric games.'},
+];
+
+let influencers = [
+  {id:1, name:'CozyKateGames',     handle:'@cozykategames',  platform:'YouTube,TikTok',     followers:'285k',  niche:'Cozy / Sim',           region:'UK',            language:'English', email:'kate@cozykategames.co.uk', status:'Active', lastContacted:'2026-05-22', notes:'Reviewed Unpacking, House Flipper 2. Perfect Tier 1 cozy match.'},
+  {id:2, name:'TheRenoStreamer',   handle:'@renostreamer',   platform:'Twitch,YouTube',     followers:'124k',  niche:'Renovation Sim',        region:'North America', language:'English', email:'reno@renostreamer.tv',     status:'Active', lastContacted:'2026-05-18', notes:'Plays exclusively renovation/builder games. Specific Majid persona fit.'},
+  {id:3, name:'MochiPlays',        handle:'@mochiplays',     platform:'TikTok',             followers:'1.2M',  niche:'Wholesome Games',        region:'Japan',         language:'Japanese',email:'mochi@mochiplays.jp',      status:'New Entry', lastContacted:'', notes:'Massive TikTok cozy following. Reach out for Jenny stage.'},
+  {id:4, name:'IndieWatcher',      handle:'@indiewatcher',   platform:'YouTube',            followers:'78k',   niche:'Indie Curation',         region:'North America', language:'English', email:'hello@indiewatcher.com',    status:'Active', lastContacted:'2026-04-30', notes:'Curates indie game weekly. High retention audience.'},
+  {id:5, name:'Bea Builds',        handle:'@beabuilds',      platform:'Twitch,YouTube',     followers:'52k',   niche:'Sim / Building',         region:'UK',            language:'English', email:'bea@beabuilds.tv',          status:'New Entry', lastContacted:'', notes:'Streams Sims, House Flipper, Animal Crossing.'},
+  {id:6, name:'GameDevSamir',      handle:'@gamedevsamir',   platform:'YouTube,Twitter',    followers:'34k',   niche:'Dev Commentary',         region:'MENA',          language:'Arabic',  email:'samir@gamedevsamir.me',     status:'Active', lastContacted:'2026-05-10', notes:'Bilingual dev. Could provide Arabic-language coverage hook.'},
+  {id:7, name:'PuddleCatYT',       handle:'@puddlecat',      platform:'YouTube,TikTok',     followers:'420k',  niche:'Cozy / Story Games',     region:'North America', language:'English', email:'puddlecat@puddlecat.gg',    status:'Active', lastContacted:'2026-05-12', notes:'Reviewed Dordogne, Season. Strong narrative-cozy aligned audience.'},
+  {id:8, name:'PixelMaman',        handle:'@pixelmaman',     platform:'YouTube,Instagram',  followers:'68k',   niche:'Family-friendly',        region:'France',        language:'French',  email:'pixel@pixelmaman.fr',       status:'New Entry', lastContacted:'', notes:'French cozy/family games coverage.'},
+  {id:9, name:'Niko Sammler',      handle:'@nikosammler',    platform:'Twitch',             followers:'19k',   niche:'Slow Streams',           region:'Germany',       language:'English', email:'niko@nikosammler.de',       status:'Cold',     lastContacted:'2026-02-14', notes:'Niche but devoted audience. Long sessions.'},
+  {id:10,name:'CafeGameClub',      handle:'@cafegameclub',   platform:'TikTok,Instagram',   followers:'890k',  niche:'Aesthetic / Lifestyle',  region:'North America', language:'English', email:'hi@cafegameclub.com',       status:'New Entry', lastContacted:'', notes:'Lifestyle-aesthetic crossover. Jenny stage gold.'},
+];
+
+// State
+let currentView = 'dashboard';
+let currentCampaignId = null;
+let currentDetailTab = 'tasks';
+let editingType = null;
+let editingId = null;
+let collapsedGroups = {};
+
+/* ════════════════ HELPERS ════════════════ */
+const $ = id => document.getElementById(id);
+function initials(n) { return n.split(/[\s/]/).filter(Boolean).map(p=>p[0]||'').join('').substring(0,2).toUpperCase(); }
+function avatarBg(n) {
+  const colors=['#c8411b','#1a6b5e','#5b3eb8','#b8860b','#1e6fa8','#7c4a8c','#2a7a4b','#a83418'];
+  let h=0; for(let i=0;i<n.length;i++) h=n.charCodeAt(i)+((h<<5)-h);
+  return colors[Math.abs(h)%colors.length];
+}
+function fmtDate(d) { if(!d) return ''; const dt=new Date(d+'T12:00:00'); return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}); }
+function fmtDateLong(d) { if(!d) return ''; const dt=new Date(d+'T12:00:00'); return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function isOverdue(d, status) {
+  if (!d||status==='Done') return false;
+  return new Date(d+'T12:00:00') < new Date();
+}
+function getLangClass(lang) {
+  return {English:'lang-en',Arabic:'lang-ar',French:'lang-fr',Portuguese:'lang-pt',Norwegian:'lang-no',Japanese:'lang-ja',Spanish:'lang-es'}[lang]||'lang-en';
+}
+function getPlatformTag(p) {
+  const cls={Xbox:'platform-xbox',Steam:'platform-steam',Switch:'platform-switch',PlayStation:'platform-ps',YouTube:'platform-yt',Twitch:'platform-twitch',TikTok:'platform-tiktok',Twitter:'platform-twitter',Instagram:'platform-ig'}[p];
+  return cls ? `<span class="tag ${cls}">${p}</span>` : '';
+}
+function platforms(s) { if(!s) return '<span class="dash">—</span>'; return s.split(',').map(p=>getPlatformTag(p.trim())).join(''); }
+function linkedCampaignsFor(contactId, type) {
+  // Find tasks where this contact is linked, then dedupe campaigns
+  const key = type==='press' ? 'pressIds' : 'influencerIds';
+  const camps = new Set();
+  tasks.forEach(t => { if (t[key].includes(contactId)) camps.add(t.campaignId); });
+  return [...camps].map(cid => campaigns.find(c=>c.id===cid)).filter(Boolean);
+}
+
+/* ════════════════ NAVIGATION ════════════════ */
+function switchView(view, opts={}) {
+  currentView = view;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  $('view-'+view)?.classList.add('active');
+  document.querySelector(`.nav-item[data-view="${view}"]`)?.classList.add('active');
+
+  const titles = { dashboard:'Dashboard', campaigns:'Campaigns', tasks:'All Tasks', press:'Press · Journalists', influencers:'Creators · Influencers' };
+  const subs = {
+    dashboard:'Workspace overview',
+    campaigns:`${campaigns.length} active`,
+    tasks:`${tasks.length} total`,
+    press:`${pressContacts.length} contacts`,
+    influencers:`${influencers.length} creators`
+  };
+  $('pageTitle').textContent = titles[view] || '';
+  $('pageSubtitle').textContent = subs[view] || '';
+  $('bc-current').textContent = titles[view] || '';
+
+  // Page actions
+  const actions = {
+    campaigns: `<button class="toolbar-btn" onclick="openCampaignModal()">+ New Campaign</button>`,
+    tasks:     `<button class="toolbar-btn" onclick="openTaskModal()">+ New Task</button>`,
+    press:     `<button class="toolbar-btn" onclick="openPressModal()">+ Add Press Contact</button>`,
+    influencers:`<button class="toolbar-btn" onclick="openInfluencerModal()">+ Add Creator</button>`,
+    dashboard: ''
+  };
+  $('pageActions').innerHTML = actions[view] || '';
+
+  // Render the specific view
+  if (view==='dashboard') renderDashboard();
+  if (view==='campaigns') renderCampaigns();
+  if (view==='tasks') renderTasks();
+  if (view==='press') renderPress();
+  if (view==='influencers') renderInfluencers();
+}
+
+function openCampaign(id) {
+  currentCampaignId = id;
+  currentDetailTab = 'tasks';
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  $('view-campaign-detail').classList.add('active');
+  document.querySelector('.nav-item[data-view="campaigns"]')?.classList.add('active');
+  renderCampaignDetail();
+}
+
+/* ════════════════ DASHBOARD ════════════════ */
+function renderDashboard() {
+  const openTasks = tasks.filter(t => t.status !== 'Done');
+  const active = campaigns.filter(c => c.status === 'Live' || c.status === 'Upcoming');
+  const overdue = openTasks.filter(t => isOverdue(t.dueDate, t.status));
+  const totalLinks = tasks.reduce((s,t)=>s+t.pressIds.length+t.influencerIds.length,0);
+
+  $('dashStats').innerHTML = `
+    <div class="dash-stat"><div class="dash-stat-label">Active Campaigns</div><div class="dash-stat-value">${active.length}</div><div class="dash-stat-delta">${campaigns.length} total</div></div>
+    <div class="dash-stat"><div class="dash-stat-label">Open Tasks</div><div class="dash-stat-value accent">${openTasks.length}</div><div class="dash-stat-delta">${overdue.length} overdue</div></div>
+    <div class="dash-stat"><div class="dash-stat-label">Press · Creators</div><div class="dash-stat-value teal">${pressContacts.length} / ${influencers.length}</div><div class="dash-stat-delta">contacts in network</div></div>
+    <div class="dash-stat"><div class="dash-stat-label">Contact Links</div><div class="dash-stat-value gold">${totalLinks}</div><div class="dash-stat-delta">across all tasks</div></div>
+  `;
+
+  // upcoming tasks — show next 14 to capture full June workflow
+  const upcoming = [...openTasks].sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||'')).slice(0,14);
+  $('upcomingTasks').innerHTML = upcoming.length ? upcoming.map(t => {
+    const c = campaigns.find(c=>c.id===t.campaignId);
+    const pdot = { High:'#c8411b', Medium:'#b8860b', Low:'#8a8070' }[t.priority];
+    return `<div class="dash-task-row" onclick="openTaskPanel(${t.id})">
+      <span class="dash-task-priority-dot" style="background:${pdot}"></span>
+      <span class="dash-task-title">${t.title}</span>
+      <span class="dash-task-campaign">${c?c.name.split('—')[0].trim():'—'}</span>
+      <span class="dash-task-due ${isOverdue(t.dueDate,t.status)?'':''}" style="${isOverdue(t.dueDate,t.status)?'color:var(--accent);font-weight:500':''}">${fmtDate(t.dueDate)||'no date'}</span>
+    </div>`;
+  }).join('') : `<div class="empty-state" style="padding:1.5rem;border:none"><div class="empty-icon">✓</div><p>All caught up!</p></div>`;
+
+  // active campaigns
+  $('activeCampaigns').innerHTML = active.length ? active.map(c => {
+    const ts = tasks.filter(t=>t.campaignId===c.id);
+    const done = ts.filter(t=>t.status==='Done').length;
+    const pct = ts.length ? Math.round((done/ts.length)*100) : 0;
+    return `<div class="dash-task-row" onclick="openCampaign(${c.id})">
+      <span class="dash-task-priority-dot" style="background:${STATUS_CAMPAIGN[c.status]?.color||'#8a8070'}"></span>
+      <span class="dash-task-title">${c.name}</span>
+      <span class="dash-task-campaign">${ts.length} task${ts.length!==1?'s':''}</span>
+      <span class="dash-task-due">${pct}%</span>
+    </div>`;
+  }).join('') : `<div class="empty-state" style="padding:1.5rem;border:none"><p>No active campaigns.</p></div>`;
+
+  // counts in sidebar
+  $('navCount-campaigns').textContent = campaigns.length;
+  $('navCount-tasks').textContent = tasks.filter(t=>t.status!=='Done').length;
+  $('navCount-press').textContent = pressContacts.length;
+  $('navCount-influencers').textContent = influencers.length;
+
+  // pinned campaigns sidebar
+  $('pinnedCampaigns').innerHTML = campaigns.slice(0,4).map(c => `
+    <div class="campaign-pin" onclick="openCampaign(${c.id})">
+      <span class="campaign-dot" style="background:${STATUS_CAMPAIGN[c.status]?.color||'#8a8070'}"></span>
+      <span class="campaign-pin-name">${c.name}</span>
+    </div>
+  `).join('');
+}
+
+/* ════════════════ CAMPAIGNS GRID ════════════════ */
+function renderCampaigns() {
+  $('campaignsGrid').innerHTML = campaigns.map(c => {
+    const ts = tasks.filter(t=>t.campaignId===c.id);
+    const done = ts.filter(t=>t.status==='Done').length;
+    const pct = ts.length ? Math.round((done/ts.length)*100) : 0;
+    const statusCls = STATUS_CAMPAIGN[c.status]?.cls || '';
+    return `
+      <div class="campaign-card" style="border-top-color:transparent" onclick="openCampaign(${c.id})">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${c.color}"></div>
+        <span class="campaign-card-status ${statusCls}">${c.status}</span>
+        <div class="campaign-card-name">${c.name}</div>
+        <div class="campaign-card-project">${c.project}</div>
+        <div class="campaign-card-desc">${c.description}</div>
+        <div class="campaign-progress"><div class="campaign-progress-bar" style="width:${pct}%;background:${c.color}"></div></div>
+        <div class="campaign-card-meta">
+          <span>${ts.length} task${ts.length!==1?'s':''} · ${pct}% done</span>
+          <span>${fmtDate(c.endDate)||'no end date'}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ════════════════ CAMPAIGN DETAIL ════════════════ */
+function renderCampaignDetail() {
+  const c = campaigns.find(x => x.id === currentCampaignId);
+  if (!c) return;
+  const ts = tasks.filter(t=>t.campaignId===c.id);
+  const done = ts.filter(t=>t.status==='Done').length;
+  const pct = ts.length ? Math.round((done/ts.length)*100) : 0;
+
+  // Aggregate linked contacts across all tasks in this campaign
+  const linkedPress = new Set(); const linkedInf = new Set();
+  ts.forEach(t => { t.pressIds.forEach(p=>linkedPress.add(p)); t.influencerIds.forEach(i=>linkedInf.add(i)); });
+
+  $('campaignDetailContent').innerHTML = `
+    <div class="campaign-detail-header" style="border-bottom:3px solid ${c.color}">
+      <button class="back-btn" onclick="switchView('campaigns')">← Back to Campaigns</button>
+      <div class="campaign-detail-title">${c.name}</div>
+      <div class="campaign-detail-project">${c.project} · ${c.status}</div>
+      <div class="campaign-detail-meta">
+        <span><strong>Start:</strong> ${fmtDateLong(c.startDate)||'—'}</span>
+        <span><strong>End:</strong> ${fmtDateLong(c.endDate)||'—'}</span>
+        <span><strong>Tasks:</strong> ${ts.length} (${done} done · ${pct}%)</span>
+        <span><strong>Press linked:</strong> ${linkedPress.size}</span>
+        <span><strong>Creators linked:</strong> ${linkedInf.size}</span>
+      </div>
+      <p style="font-size:0.78rem;color:rgba(245,242,236,0.75);margin-top:1rem;max-width:700px;line-height:1.5">${c.description}</p>
+      <div style="margin-top:1rem;display:flex;gap:0.5rem">
+        <button class="toolbar-btn" style="background:white;color:var(--ink);border-color:white" onclick="openTaskModal(${c.id})">+ Add Task</button>
+        <button class="toolbar-btn" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.7)" onclick="openCampaignModal(${c.id})">✎ Edit Campaign</button>
+      </div>
+    </div>
+
+    <div class="detail-tabs">
+      <button class="detail-tab ${currentDetailTab==='tasks'?'active':''}" onclick="setDetailTab('tasks')">
+        Tasks <span class="detail-tab-count">${ts.length}</span>
+      </button>
+      <button class="detail-tab ${currentDetailTab==='press'?'active':''}" onclick="setDetailTab('press')">
+        Linked Press <span class="detail-tab-count">${linkedPress.size}</span>
+      </button>
+      <button class="detail-tab ${currentDetailTab==='influencers'?'active':''}" onclick="setDetailTab('influencers')">
+        Linked Creators <span class="detail-tab-count">${linkedInf.size}</span>
+      </button>
+    </div>
+
+    <div class="linked-contacts-section ${currentDetailTab==='tasks'?'active':''}" id="cd-tasks">
+      ${renderCampaignTasksTable(ts)}
+    </div>
+
+    <div class="linked-contacts-section ${currentDetailTab==='press'?'active':''}" id="cd-press">
+      ${renderLinkedContactsList([...linkedPress], 'press')}
+    </div>
+
+    <div class="linked-contacts-section ${currentDetailTab==='influencers'?'active':''}" id="cd-influencers">
+      ${renderLinkedContactsList([...linkedInf], 'influencer')}
+    </div>
+  `;
+}
+
+function setDetailTab(tab) {
+  currentDetailTab = tab;
+  renderCampaignDetail();
+}
+
+function renderCampaignTasksTable(ts) {
+  if (!ts.length) return `<div class="empty-state"><div class="empty-icon">+</div><p>No tasks yet.<br>Add a task to get this campaign moving.</p></div>`;
+  return `
+    <table class="tasks-table">
+      <thead><tr><th>Task</th><th>Status</th><th>Priority</th><th>Assignee</th><th>Due</th><th>Linked</th></tr></thead>
+      <tbody>${ts.map(t=>renderTaskRow(t,false)).join('')}</tbody>
+    </table>
+  `;
+}
+
+function renderLinkedContactsList(ids, type) {
+  if (!ids.length) return `<div class="empty-state"><div class="empty-icon">○</div><p>No ${type==='press'?'press contacts':'creators'} linked to any task in this campaign yet.<br>Add them when assigning tasks.</p></div>`;
+  const list = type==='press' ? pressContacts : influencers;
+  const items = ids.map(id => list.find(c=>c.id===id)).filter(Boolean);
+
+  return `
+    <table class="contacts-table">
+      <thead><tr>
+        <th style="width:240px">Name</th>
+        <th>${type==='press'?'Publication':'Platform / Handle'}</th>
+        <th>${type==='press'?'Language':'Niche'}</th>
+        <th>${type==='press'?'Region':'Followers'}</th>
+        <th>Linked via task</th>
+      </tr></thead>
+      <tbody>
+        ${items.map(c=>{
+          const usingTasks = tasks.filter(t => t.campaignId===currentCampaignId && t[type==='press'?'pressIds':'influencerIds'].includes(c.id));
+          return `<tr onclick="open${type==='press'?'PressPanel':'InfluencerPanel'}(${c.id})">
+            <td><div class="name-cell"><div class="avatar" style="background:${avatarBg(c.name)}">${initials(c.name)}</div><div><div class="contact-name">${c.name}</div></div></div></td>
+            <td>${type==='press'?(c.publication||'<span class="dash">—</span>'):`<div style="font-size:0.7rem">${platforms(c.platform)}<div style="color:var(--muted);font-size:0.62rem;margin-top:0.15rem">${c.handle||''}</div></div>`}</td>
+            <td>${type==='press'?(c.language?`<span class="tag ${getLangClass(c.language)}">${c.language}</span>`:'<span class="dash">—</span>'):(c.niche||'<span class="dash">—</span>')}</td>
+            <td>${type==='press'?(c.region||'<span class="dash">—</span>'):(c.followers||'<span class="dash">—</span>')}</td>
+            <td style="font-size:0.65rem;color:var(--muted)">${usingTasks.map(t=>t.title.substring(0,30)+(t.title.length>30?'…':'')).join('<br>')}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+/* ════════════════ TASKS PAGE ════════════════ */
+function renderTasks() {
+  // populate filter dropdown
+  const sel = $('taskFilterCampaign');
+  if (sel.options.length <= 1) {
+    campaigns.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id; opt.textContent = c.name;
+      sel.appendChild(opt);
+    });
+  }
+  renderTasksTable();
+}
+
+function renderTasksTable() {
+  const fc = $('taskFilterCampaign').value;
+  const fs = $('taskFilterStatus').value;
+  const fp = $('taskFilterPriority').value;
+  let data = tasks;
+  if (fc) data = data.filter(t=>String(t.campaignId)===fc);
+  if (fs) data = data.filter(t=>t.status===fs);
+  if (fp) data = data.filter(t=>t.priority===fp);
+
+  $('tasksMainBody').innerHTML = data.length
+    ? data.map(t=>renderTaskRow(t,true)).join('')
+    : `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">○</div><p>No tasks match the filter.</p></div></td></tr>`;
+}
+
+function renderTaskRow(t, showCampaign=true) {
+  const c = campaigns.find(c=>c.id===t.campaignId);
+  const sm = STATUS_TASK[t.status]||STATUS_TASK['To Do'];
+  return `<tr onclick="openTaskPanel(${t.id})">
+    <td class="task-title-cell" title="${t.title}">${t.title}</td>
+    ${showCampaign?`<td><span style="font-size:0.65rem;color:var(--muted)">${c?c.name:'—'}</span></td>`:''}
+    <td><span class="status-pill ${sm.cls}"><span class="dot"></span>${t.status}</span></td>
+    <td><span class="priority-flag priority-${t.priority.toLowerCase()}">${t.priority}</span></td>
+    <td><div class="assignee-cell"><div class="avatar sm" style="background:${avatarBg(t.assignee)}">${initials(t.assignee)}</div>${t.assignee}</div></td>
+    <td><span class="date-cell ${isOverdue(t.dueDate,t.status)?'overdue':''}">${fmtDate(t.dueDate)||'<span class="dash">—</span>'}</span></td>
+    <td><div class="linked-count-cell">
+      ${t.pressIds.length?`<span class="linked-icon press">📰 <strong>${t.pressIds.length}</strong></span>`:''}
+      ${t.influencerIds.length?`<span class="linked-icon creator">🎬 <strong>${t.influencerIds.length}</strong></span>`:''}
+      ${!t.pressIds.length&&!t.influencerIds.length?'<span class="dash">—</span>':''}
+    </div></td>
+  </tr>`;
+}
+
+/* ════════════════ PRESS PAGE ════════════════ */
+function renderPress() {
+  const groups = {};
+  pressContacts.forEach(c => { if(!groups[c.status]) groups[c.status]=[]; groups[c.status].push(c); });
+  const order = ['Active','New Entry','Incomplete','Cold','Blacklist'];
+  const keys = [...new Set([...order.filter(k=>groups[k]), ...Object.keys(groups)])];
+
+  let html = '';
+  keys.forEach(status => {
+    const rows = groups[status]||[];
+    const color = STATUS_CONTACT[status]||'#8a8070';
+    const collapsed = collapsedGroups['press-'+status];
+    html += `<tr class="group-header"><td colspan="7">
+      <div class="group-label">
+        <button class="group-toggle${collapsed?' collapsed':''}" onclick="toggleGroup('press-${status}')">▼</button>
+        <span class="group-status-dot" style="background:${color}"></span>
+        <span style="color:${color}">${status.toUpperCase()}</span>
+        <span class="group-count">${rows.length}</span>
+      </div>
+    </td></tr>`;
+    if (!collapsed) {
+      rows.forEach(c => {
+        const linkedCamps = linkedCampaignsFor(c.id, 'press');
+        html += `<tr onclick="openPressPanel(${c.id})">
+          <td><div class="name-cell"><div class="avatar" style="background:${avatarBg(c.name)}">${initials(c.name)}</div><span class="contact-name">${c.name}</span></div></td>
+          <td><span style="font-size:0.68rem;color:var(--muted)">${c.email||'<span class="dash">—</span>'}</span></td>
+          <td>${c.publication||'<span class="dash">—</span>'}</td>
+          <td>${c.language?`<span class="tag ${getLangClass(c.language)}">${c.language}</span>`:'<span class="dash">—</span>'}</td>
+          <td><span style="font-size:0.7rem">${c.region||'<span class="dash">—</span>'}</span></td>
+          <td>${platforms(c.platform)}</td>
+          <td>${linkedCamps.length?linkedCamps.map(cc=>`<span class="chip" style="border-left:2px solid ${cc.color}">${cc.name.split('—')[0].trim().substring(0,18)}${cc.name.length>18?'…':''}</span>`).join(''):'<span class="dash">—</span>'}</td>
+        </tr>`;
+      });
+    }
+  });
+  $('pressTableBody').innerHTML = html;
+}
+
+/* ════════════════ INFLUENCER PAGE ════════════════ */
+function renderInfluencers() {
+  const groups = {};
+  influencers.forEach(c => { if(!groups[c.status]) groups[c.status]=[]; groups[c.status].push(c); });
+  const order = ['Active','New Entry','Incomplete','Cold','Blacklist'];
+  const keys = [...new Set([...order.filter(k=>groups[k]), ...Object.keys(groups)])];
+
+  let html = '';
+  keys.forEach(status => {
+    const rows = groups[status]||[];
+    const color = STATUS_CONTACT[status]||'#8a8070';
+    const collapsed = collapsedGroups['inf-'+status];
+    html += `<tr class="group-header"><td colspan="7">
+      <div class="group-label">
+        <button class="group-toggle${collapsed?' collapsed':''}" onclick="toggleGroup('inf-${status}')">▼</button>
+        <span class="group-status-dot" style="background:${color}"></span>
+        <span style="color:${color}">${status.toUpperCase()}</span>
+        <span class="group-count">${rows.length}</span>
+      </div>
+    </td></tr>`;
+    if (!collapsed) {
+      rows.forEach(c => {
+        const linkedCamps = linkedCampaignsFor(c.id, 'influencer');
+        html += `<tr onclick="openInfluencerPanel(${c.id})">
+          <td><div class="name-cell"><div class="avatar" style="background:${avatarBg(c.name)}">${initials(c.name)}</div><div><div class="contact-name">${c.name}</div></div></div></td>
+          <td><div>${platforms(c.platform)}<div style="font-size:0.62rem;color:var(--muted);margin-top:0.15rem">${c.handle||''}</div></div></td>
+          <td><span style="font-weight:600;font-size:0.72rem">${c.followers||'—'}</span></td>
+          <td><span style="font-size:0.7rem">${c.niche||'<span class="dash">—</span>'}</span></td>
+          <td><span style="font-size:0.7rem;color:var(--muted)">${c.region||'<span class="dash">—</span>'}</span></td>
+          <td><span style="font-size:0.65rem;color:var(--muted)">${c.email||'<span class="dash">—</span>'}</span></td>
+          <td>${linkedCamps.length?linkedCamps.map(cc=>`<span class="chip" style="border-left:2px solid ${cc.color}">${cc.name.split('—')[0].trim().substring(0,18)}${cc.name.length>18?'…':''}</span>`).join(''):'<span class="dash">—</span>'}</td>
+        </tr>`;
+      });
+    }
+  });
+  $('influencerTableBody').innerHTML = html;
+}
+
+function toggleGroup(key) { collapsedGroups[key]=!collapsedGroups[key]; if(currentView==='press')renderPress(); else renderInfluencers(); }
+
+/* ════════════════ TASK PANEL ════════════════ */
+function openTaskPanel(id) {
+  const t = tasks.find(x=>x.id===id); if(!t) return;
+  const c = campaigns.find(c=>c.id===t.campaignId);
+  const sm = STATUS_TASK[t.status]||STATUS_TASK['To Do'];
+
+  const linkedPress = t.pressIds.map(pid => pressContacts.find(p=>p.id===pid)).filter(Boolean);
+  const linkedInf = t.influencerIds.map(iid => influencers.find(i=>i.id===iid)).filter(Boolean);
+
+  $('panel').innerHTML = `
+    <div class="panel-header">
+      <div style="flex:1;min-width:0">
+        <div class="panel-name">${t.title}</div>
+        <div class="panel-sub">${c?c.name:'No campaign'} · ${t.assignee}</div>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-shrink:0">
+        <button class="close-btn" onclick="closePanel();openTaskModal(null,${t.id})">✎</button>
+        <button class="close-btn" onclick="closePanel()">✕</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="panel-section">
+        <div class="panel-section-title">Status</div>
+        <div style="margin-bottom:0.5rem"><span class="status-pill ${sm.cls}"><span class="dot"></span>${t.status}</span></div>
+        <div style="display:flex;flex-wrap:wrap">
+          ${Object.keys(STATUS_TASK).map(s=>`<button class="status-chip${s===t.status?' active':''}" onclick="updateTaskStatus(${t.id},'${s}')">${s}</button>`).join('')}
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Details</div>
+        <div class="panel-field"><span class="panel-key">Campaign</span><span class="panel-val">${c?`<a style="color:var(--accent);cursor:pointer;text-decoration:none" onclick="closePanel();openCampaign(${c.id})">${c.name}</a>`:'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Priority</span><span class="panel-val"><span class="priority-flag priority-${t.priority.toLowerCase()}">${t.priority}</span></span></div>
+        <div class="panel-field"><span class="panel-key">Assignee</span><span class="panel-val"><div class="assignee-cell"><div class="avatar sm" style="background:${avatarBg(t.assignee)}">${initials(t.assignee)}</div>${t.assignee}</div></span></div>
+        <div class="panel-field"><span class="panel-key">Due Date</span><span class="panel-val ${isOverdue(t.dueDate,t.status)?'':''}" style="${isOverdue(t.dueDate,t.status)?'color:var(--accent);font-weight:500':''}">${fmtDateLong(t.dueDate)||'—'}</span></div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-section-title">
+          <span>Linked Press (${linkedPress.length})</span>
+          <button class="panel-section-action" onclick="togglePicker('press',${t.id})">+ Link press</button>
+        </div>
+        <div id="pickerWrap-press"></div>
+        <div>
+          ${linkedPress.length?linkedPress.map(p=>`
+            <div class="linked-item" onclick="closePanel();setTimeout(()=>openPressPanel(${p.id}),100)">
+              <div class="avatar sm" style="background:${avatarBg(p.name)}">${initials(p.name)}</div>
+              <div class="linked-item-info">
+                <div class="linked-item-name">${p.name}</div>
+                <div class="linked-item-sub">${p.publication||'—'} · ${p.email||'no email'}</div>
+              </div>
+              <button class="linked-item-remove" onclick="event.stopPropagation();unlinkContact(${t.id},'press',${p.id})">✕</button>
+            </div>
+          `).join(''):'<div style="font-size:0.7rem;color:var(--muted);padding:0.5rem 0">No press contacts linked yet.</div>'}
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-section-title">
+          <span>Linked Creators (${linkedInf.length})</span>
+          <button class="panel-section-action" onclick="togglePicker('influencer',${t.id})">+ Link creator</button>
+        </div>
+        <div id="pickerWrap-influencer"></div>
+        <div>
+          ${linkedInf.length?linkedInf.map(p=>`
+            <div class="linked-item" onclick="closePanel();setTimeout(()=>openInfluencerPanel(${p.id}),100)">
+              <div class="avatar sm" style="background:${avatarBg(p.name)}">${initials(p.name)}</div>
+              <div class="linked-item-info">
+                <div class="linked-item-name">${p.name}</div>
+                <div class="linked-item-sub">${p.handle||''} · ${p.followers||'—'} · ${p.niche||''}</div>
+              </div>
+              <button class="linked-item-remove" onclick="event.stopPropagation();unlinkContact(${t.id},'influencer',${p.id})">✕</button>
+            </div>
+          `).join(''):'<div style="font-size:0.7rem;color:var(--muted);padding:0.5rem 0">No creators linked yet.</div>'}
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-section-title">Notes</div>
+        <textarea class="panel-notes" id="taskNotes_${t.id}" onblur="saveTaskNotes(${t.id})">${t.notes||''}</textarea>
+      </div>
+    </div>
+  `;
+  $('panelOverlay').classList.add('open');
+}
+
+function updateTaskStatus(id, status) { const t=tasks.find(x=>x.id===id); if(t){t.status=status;openTaskPanel(id);renderActiveViews();showToast('Status → '+status);} }
+function saveTaskNotes(id) { const t=tasks.find(x=>x.id===id);const el=$('taskNotes_'+id); if(t&&el){t.notes=el.value;showToast('Notes saved.');} }
+
+function unlinkContact(taskId, type, contactId) {
+  const t = tasks.find(x=>x.id===taskId); if(!t) return;
+  const key = type==='press'?'pressIds':'influencerIds';
+  t[key] = t[key].filter(id=>id!==contactId);
+  openTaskPanel(taskId);
+  renderActiveViews();
+  showToast('Unlinked.');
+}
+
+/* ════════════════ LINK PICKER ════════════════ */
+function togglePicker(type, taskId) {
+  const wrap = $(`pickerWrap-${type}`);
+  if (wrap.children.length) { wrap.innerHTML=''; return; }
+  const list = type==='press' ? pressContacts : influencers;
+  const t = tasks.find(x=>x.id===taskId);
+  const linkedIds = t[type==='press'?'pressIds':'influencerIds'];
+  const available = list.filter(c => !linkedIds.includes(c.id));
+
+  wrap.innerHTML = `
+    <div class="link-picker" style="margin-bottom:0.5rem">
+      <input class="link-picker-input" type="text" placeholder="Search ${type==='press'?'press contacts':'creators'}..." oninput="filterPicker(this,'${type}',${taskId})" onfocus="this.nextElementSibling.classList.add('open')" id="pickerInput-${type}">
+      <div class="link-picker-dropdown open" id="pickerDrop-${type}">
+        ${available.length?available.map(c=>`
+          <div class="link-picker-result" onclick="linkContact(${taskId},'${type}',${c.id})">
+            <div class="avatar sm" style="background:${avatarBg(c.name)}">${initials(c.name)}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</div>
+              <div style="font-size:0.6rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${type==='press'?(c.publication||c.email||'—'):(c.handle+' · '+(c.followers||''))}</div>
+            </div>
+          </div>
+        `).join(''):'<div class="link-picker-empty">All available contacts already linked</div>'}
+      </div>
+    </div>
+  `;
+  setTimeout(()=>$('pickerInput-'+type).focus(),50);
+}
+
+function filterPicker(input, type, taskId) {
+  const q = input.value.toLowerCase();
+  const list = type==='press' ? pressContacts : influencers;
+  const t = tasks.find(x=>x.id===taskId);
+  const linkedIds = t[type==='press'?'pressIds':'influencerIds'];
+  const filtered = list.filter(c => !linkedIds.includes(c.id) && (
+    c.name.toLowerCase().includes(q) ||
+    (c.publication||'').toLowerCase().includes(q) ||
+    (c.handle||'').toLowerCase().includes(q) ||
+    (c.niche||'').toLowerCase().includes(q) ||
+    (c.email||'').toLowerCase().includes(q)
+  ));
+  $('pickerDrop-'+type).innerHTML = filtered.length?filtered.map(c=>`
+    <div class="link-picker-result" onclick="linkContact(${taskId},'${type}',${c.id})">
+      <div class="avatar sm" style="background:${avatarBg(c.name)}">${initials(c.name)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</div>
+        <div style="font-size:0.6rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${type==='press'?(c.publication||c.email||'—'):(c.handle+' · '+(c.followers||''))}</div>
+      </div>
+    </div>
+  `).join(''):'<div class="link-picker-empty">No matches</div>';
+}
+
+function linkContact(taskId, type, contactId) {
+  const t = tasks.find(x=>x.id===taskId);
+  const key = type==='press'?'pressIds':'influencerIds';
+  if (!t[key].includes(contactId)) { t[key].push(contactId); }
+  openTaskPanel(taskId);
+  renderActiveViews();
+  showToast('Linked.');
+}
+
+/* ════════════════ CONTACT PANELS ════════════════ */
+function openPressPanel(id) {
+  const c = pressContacts.find(x=>x.id===id); if(!c) return;
+  const color = STATUS_CONTACT[c.status]||'#8a8070';
+  const linkedTasks = tasks.filter(t=>t.pressIds.includes(c.id));
+
+  $('panel').innerHTML = `
+    <div class="panel-header">
+      <div style="flex:1;min-width:0">
+        <div class="panel-name">${c.name}</div>
+        <div class="panel-sub">${c.publication||'No publication'} · ${c.region||''}</div>
+      </div>
+      <div style="display:flex;gap:0.5rem">
+        <button class="close-btn" onclick="closePanel();openPressModal(${c.id})">✎</button>
+        <button class="close-btn" onclick="closePanel()">✕</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="panel-section">
+        <div class="panel-section-title">Status</div>
+        <div style="margin-bottom:0.5rem"><span class="tag" style="background:${color}22;color:${color}">● ${c.status}</span></div>
+        <div style="display:flex;flex-wrap:wrap">
+          ${Object.keys(STATUS_CONTACT).map(s=>`<button class="status-chip${s===c.status?' active':''}" onclick="updateContactStatus('press',${c.id},'${s}')">${s}</button>`).join('')}
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Contact Info</div>
+        <div class="panel-field"><span class="panel-key">Email</span><span class="panel-val">${c.email||'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Publication</span><span class="panel-val">${c.publication||'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Language</span><span class="panel-val">${c.language?`<span class="tag ${getLangClass(c.language)}">${c.language}</span>`:'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Region</span><span class="panel-val">${c.region||'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Platforms</span><span class="panel-val">${c.platform?platforms(c.platform):'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Last Contact</span><span class="panel-val">${fmtDateLong(c.lastContacted)||'—'}</span></div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Linked Tasks (${linkedTasks.length})</div>
+        ${linkedTasks.length?linkedTasks.map(t=>{
+          const camp = campaigns.find(c=>c.id===t.campaignId);
+          return `<div class="linked-item" onclick="closePanel();setTimeout(()=>openTaskPanel(${t.id}),100)">
+            <span class="status-pill ${STATUS_TASK[t.status].cls}" style="padding:0.15rem 0.4rem"><span class="dot"></span></span>
+            <div class="linked-item-info">
+              <div class="linked-item-name">${t.title}</div>
+              <div class="linked-item-sub">${camp?camp.name:'—'} · due ${fmtDate(t.dueDate)||'—'}</div>
+            </div>
+          </div>`;
+        }).join(''):'<div style="font-size:0.7rem;color:var(--muted);padding:0.5rem 0">Not yet linked to any task.</div>'}
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Notes</div>
+        <textarea class="panel-notes" id="pressNotes_${c.id}" onblur="savePressNotes(${c.id})">${c.notes||''}</textarea>
+      </div>
+    </div>
+  `;
+  $('panelOverlay').classList.add('open');
+}
+
+function openInfluencerPanel(id) {
+  const c = influencers.find(x=>x.id===id); if(!c) return;
+  const color = STATUS_CONTACT[c.status]||'#8a8070';
+  const linkedTasks = tasks.filter(t=>t.influencerIds.includes(c.id));
+
+  $('panel').innerHTML = `
+    <div class="panel-header">
+      <div style="flex:1;min-width:0">
+        <div class="panel-name">${c.name}</div>
+        <div class="panel-sub">${c.handle||''} · ${c.followers||''} · ${c.niche||''}</div>
+      </div>
+      <div style="display:flex;gap:0.5rem">
+        <button class="close-btn" onclick="closePanel();openInfluencerModal(${c.id})">✎</button>
+        <button class="close-btn" onclick="closePanel()">✕</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="panel-section">
+        <div class="panel-section-title">Status</div>
+        <div style="margin-bottom:0.5rem"><span class="tag" style="background:${color}22;color:${color}">● ${c.status}</span></div>
+        <div style="display:flex;flex-wrap:wrap">
+          ${Object.keys(STATUS_CONTACT).map(s=>`<button class="status-chip${s===c.status?' active':''}" onclick="updateContactStatus('influencer',${c.id},'${s}')">${s}</button>`).join('')}
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Creator Info</div>
+        <div class="panel-field"><span class="panel-key">Handle</span><span class="panel-val">${c.handle||'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Platforms</span><span class="panel-val">${c.platform?platforms(c.platform):'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Followers</span><span class="panel-val" style="font-weight:600">${c.followers||'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Niche</span><span class="panel-val">${c.niche||'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Region</span><span class="panel-val">${c.region||'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Language</span><span class="panel-val">${c.language?`<span class="tag ${getLangClass(c.language)}">${c.language}</span>`:'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Email</span><span class="panel-val">${c.email||'—'}</span></div>
+        <div class="panel-field"><span class="panel-key">Last Contact</span><span class="panel-val">${fmtDateLong(c.lastContacted)||'—'}</span></div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Linked Tasks (${linkedTasks.length})</div>
+        ${linkedTasks.length?linkedTasks.map(t=>{
+          const camp = campaigns.find(c=>c.id===t.campaignId);
+          return `<div class="linked-item" onclick="closePanel();setTimeout(()=>openTaskPanel(${t.id}),100)">
+            <span class="status-pill ${STATUS_TASK[t.status].cls}" style="padding:0.15rem 0.4rem"><span class="dot"></span></span>
+            <div class="linked-item-info">
+              <div class="linked-item-name">${t.title}</div>
+              <div class="linked-item-sub">${camp?camp.name:'—'} · due ${fmtDate(t.dueDate)||'—'}</div>
+            </div>
+          </div>`;
+        }).join(''):'<div style="font-size:0.7rem;color:var(--muted);padding:0.5rem 0">Not yet linked to any task.</div>'}
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Notes</div>
+        <textarea class="panel-notes" id="infNotes_${c.id}" onblur="saveInfluencerNotes(${c.id})">${c.notes||''}</textarea>
+      </div>
+    </div>
+  `;
+  $('panelOverlay').classList.add('open');
+}
+
+function updateContactStatus(type, id, status) {
+  const list = type==='press' ? pressContacts : influencers;
+  const c = list.find(x=>x.id===id); if(c){c.status=status; type==='press'?openPressPanel(id):openInfluencerPanel(id); renderActiveViews(); showToast('Status → '+status);}
+}
+function savePressNotes(id) { const c=pressContacts.find(x=>x.id===id);const el=$('pressNotes_'+id); if(c&&el){c.notes=el.value;showToast('Notes saved.');} }
+function saveInfluencerNotes(id) { const c=influencers.find(x=>x.id===id);const el=$('infNotes_'+id); if(c&&el){c.notes=el.value;showToast('Notes saved.');} }
+
+function closePanel() { $('panelOverlay').classList.remove('open'); }
+
+/* ════════════════ MODALS ════════════════ */
+function openTaskModal(campaignId=null, taskId=null) {
+  editingType='task'; editingId=taskId;
+  const t = taskId ? tasks.find(x=>x.id===taskId) : null;
+  $('modal').innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">${taskId?'Edit Task':'New Task'}</span>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Task Title *</label><input class="form-input" id="m_title" value="${t?t.title:''}" placeholder="e.g. Draft pitch template"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Campaign</label>
+          <select class="form-select" id="m_campaignId">
+            ${campaigns.map(c=>`<option value="${c.id}" ${(t?t.campaignId:campaignId)===c.id?'selected':''}>${c.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-select" id="m_status">${Object.keys(STATUS_TASK).map(s=>`<option ${t&&t.status===s?'selected':''}>${s}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Priority</label>
+          <select class="form-select" id="m_priority"><option>High</option><option ${!t||t.priority==='Medium'?'selected':''}>Medium</option><option>Low</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Assignee</label><input class="form-input" id="m_assignee" value="${t?t.assignee:'E.'}" placeholder="Initials or name"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Due Date</label><input class="form-input" id="m_dueDate" type="date" value="${t?t.dueDate:''}"></div>
+        <div class="form-group"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="m_notes">${t?t.notes:''}</textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveTask()">${taskId?'Save Changes':'Create Task'}</button>
+    </div>
+  `;
+  if (t) { $('m_status').value = t.status; $('m_priority').value = t.priority; }
+  $('modalOverlay').classList.add('open');
+}
+
+function saveTask() {
+  const title = $('m_title').value.trim();
+  if (!title) { showToast('Title is required.'); return; }
+  const data = {
+    title,
+    campaignId: parseInt($('m_campaignId').value),
+    status: $('m_status').value,
+    priority: $('m_priority').value,
+    assignee: $('m_assignee').value.trim()||'—',
+    dueDate: $('m_dueDate').value,
+    notes: $('m_notes').value.trim(),
+  };
+  if (editingId) {
+    const idx = tasks.findIndex(t=>t.id===editingId);
+    tasks[idx] = { ...tasks[idx], ...data };
+    showToast('Task updated.');
+  } else {
+    const newId = Math.max(0,...tasks.map(t=>t.id))+1;
+    tasks.push({ id:newId, ...data, pressIds:[], influencerIds:[] });
+    showToast('Task created.');
+  }
+  closeModal(); renderActiveViews();
+}
+
+function openCampaignModal(id=null) {
+  editingType='campaign'; editingId=id;
+  const c = id ? campaigns.find(x=>x.id===id) : null;
+  $('modal').innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">${id?'Edit Campaign':'New Campaign'}</span>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Campaign Name *</label><input class="form-input" id="m_name" value="${c?c.name:''}" placeholder="e.g. Steam Next Fest — Feb 2028"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Project</label><input class="form-input" id="m_project" value="${c?c.project:''}" placeholder="e.g. Builder & Son"></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-select" id="m_status">${Object.keys(STATUS_CAMPAIGN).map(s=>`<option ${c&&c.status===s?'selected':''}>${s}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Start Date</label><input class="form-input" id="m_startDate" type="date" value="${c?c.startDate:''}"></div>
+        <div class="form-group"><label class="form-label">End Date</label><input class="form-input" id="m_endDate" type="date" value="${c?c.endDate:''}"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="m_description">${c?c.description:''}</textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveCampaign()">${id?'Save Changes':'Create Campaign'}</button>
+    </div>
+  `;
+  if (c) $('m_status').value = c.status;
+  $('modalOverlay').classList.add('open');
+}
+
+function saveCampaign() {
+  const name = $('m_name').value.trim();
+  if (!name) { showToast('Name required.'); return; }
+  const data = {
+    name, project: $('m_project').value.trim()||'—', status:$('m_status').value,
+    startDate:$('m_startDate').value, endDate:$('m_endDate').value,
+    description:$('m_description').value.trim()||''
+  };
+  if (editingId) {
+    const idx = campaigns.findIndex(c=>c.id===editingId);
+    campaigns[idx] = { ...campaigns[idx], ...data };
+    showToast('Campaign updated.');
+  } else {
+    const colors = ['#c8411b','#1a6b5e','#5b3eb8','#b8860b','#1e6fa8'];
+    const newId = Math.max(0,...campaigns.map(c=>c.id))+1;
+    campaigns.push({ id:newId, ...data, color:colors[newId%colors.length] });
+    showToast('Campaign created.');
+  }
+  closeModal(); renderActiveViews();
+  if (currentView==='campaign-detail'||currentCampaignId) renderCampaignDetail();
+}
+
+function openPressModal(id=null) {
+  editingType='press'; editingId=id;
+  const c = id ? pressContacts.find(x=>x.id===id) : null;
+  $('modal').innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">${id?'Edit Press Contact':'New Press Contact'}</span>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Name *</label><input class="form-input" id="m_name" value="${c?c.name:''}"></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-select" id="m_status">${Object.keys(STATUS_CONTACT).map(s=>`<option ${c&&c.status===s?'selected':''}>${s}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="m_email" type="email" value="${c?c.email:''}"></div>
+        <div class="form-group"><label class="form-label">Publication</label><input class="form-input" id="m_publication" value="${c?c.publication:''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Language</label>
+          <select class="form-select" id="m_language"><option value="">—</option>${['English','Arabic','French','Portuguese','Norwegian','Japanese','Spanish'].map(l=>`<option ${c&&c.language===l?'selected':''}>${l}</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label class="form-label">Region</label><input class="form-input" id="m_region" value="${c?c.region:''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Platforms (comma-sep)</label><input class="form-input" id="m_platform" placeholder="e.g. Xbox,Steam" value="${c?c.platform:''}"></div>
+        <div class="form-group"><label class="form-label">Last Contacted</label><input class="form-input" id="m_lastContacted" type="date" value="${c?c.lastContacted:''}"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="m_notes">${c?c.notes:''}</textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="savePress()">${id?'Save':'Add Contact'}</button>
+    </div>
+  `;
+  if (c) $('m_status').value = c.status;
+  $('modalOverlay').classList.add('open');
+}
+
+function savePress() {
+  const name = $('m_name').value.trim(); if(!name){showToast('Name required.');return;}
+  const data = {
+    name, status:$('m_status').value, email:$('m_email').value.trim(),
+    publication:$('m_publication').value.trim(), language:$('m_language').value,
+    region:$('m_region').value.trim(), platform:$('m_platform').value.trim(),
+    lastContacted:$('m_lastContacted').value, notes:$('m_notes').value.trim()
+  };
+  if (editingId) {
+    const idx = pressContacts.findIndex(c=>c.id===editingId);
+    pressContacts[idx] = { ...pressContacts[idx], ...data };
+    showToast('Contact updated.');
+  } else {
+    const newId = Math.max(0,...pressContacts.map(c=>c.id))+1;
+    pressContacts.push({ id:newId, ...data });
+    showToast('Press contact added.');
+  }
+  closeModal(); renderActiveViews();
+}
+
+function openInfluencerModal(id=null) {
+  editingType='influencer'; editingId=id;
+  const c = id ? influencers.find(x=>x.id===id) : null;
+  $('modal').innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">${id?'Edit Creator':'New Creator'}</span>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Creator Name *</label><input class="form-input" id="m_name" value="${c?c.name:''}"></div>
+        <div class="form-group"><label class="form-label">Handle</label><input class="form-input" id="m_handle" placeholder="@username" value="${c?c.handle:''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Platforms (comma-sep)</label><input class="form-input" id="m_platform" placeholder="e.g. YouTube,TikTok" value="${c?c.platform:''}"></div>
+        <div class="form-group"><label class="form-label">Followers</label><input class="form-input" id="m_followers" placeholder="e.g. 285k or 1.2M" value="${c?c.followers:''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Niche</label><input class="form-input" id="m_niche" placeholder="e.g. Cozy / Sim" value="${c?c.niche:''}"></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-select" id="m_status">${Object.keys(STATUS_CONTACT).map(s=>`<option ${c&&c.status===s?'selected':''}>${s}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Region</label><input class="form-input" id="m_region" value="${c?c.region:''}"></div>
+        <div class="form-group"><label class="form-label">Language</label>
+          <select class="form-select" id="m_language"><option value="">—</option>${['English','Arabic','French','Portuguese','Norwegian','Japanese','Spanish'].map(l=>`<option ${c&&c.language===l?'selected':''}>${l}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="m_email" type="email" value="${c?c.email:''}"></div>
+        <div class="form-group"><label class="form-label">Last Contacted</label><input class="form-input" id="m_lastContacted" type="date" value="${c?c.lastContacted:''}"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="m_notes">${c?c.notes:''}</textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveInfluencer()">${id?'Save':'Add Creator'}</button>
+    </div>
+  `;
+  if (c) $('m_status').value = c.status;
+  $('modalOverlay').classList.add('open');
+}
+
+function saveInfluencer() {
+  const name = $('m_name').value.trim(); if(!name){showToast('Name required.');return;}
+  const data = {
+    name, handle:$('m_handle').value.trim(), platform:$('m_platform').value.trim(),
+    followers:$('m_followers').value.trim(), niche:$('m_niche').value.trim(),
+    status:$('m_status').value, region:$('m_region').value.trim(),
+    language:$('m_language').value, email:$('m_email').value.trim(),
+    lastContacted:$('m_lastContacted').value, notes:$('m_notes').value.trim()
+  };
+  if (editingId) {
+    const idx = influencers.findIndex(c=>c.id===editingId);
+    influencers[idx] = { ...influencers[idx], ...data };
+    showToast('Creator updated.');
+  } else {
+    const newId = Math.max(0,...influencers.map(c=>c.id))+1;
+    influencers.push({ id:newId, ...data });
+    showToast('Creator added.');
+  }
+  closeModal(); renderActiveViews();
+}
+
+function closeModal() { $('modalOverlay').classList.remove('open'); }
+
+function openQuickAdd() {
+  $('modal').innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">Quick Add</span>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem">What would you like to add?</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+        <button class="toolbar-btn" style="padding:1rem;flex-direction:column;align-items:flex-start;gap:0.4rem" onclick="closeModal();openTaskModal()">
+          <strong style="color:var(--ink);font-size:0.78rem">+ New Task</strong>
+          <span style="color:var(--muted);font-size:0.65rem">Add to any campaign</span>
+        </button>
+        <button class="toolbar-btn" style="padding:1rem;flex-direction:column;align-items:flex-start;gap:0.4rem" onclick="closeModal();openCampaignModal()">
+          <strong style="color:var(--ink);font-size:0.78rem">+ New Campaign</strong>
+          <span style="color:var(--muted);font-size:0.65rem">Start a marketing initiative</span>
+        </button>
+        <button class="toolbar-btn" style="padding:1rem;flex-direction:column;align-items:flex-start;gap:0.4rem" onclick="closeModal();openPressModal()">
+          <strong style="color:var(--ink);font-size:0.78rem">+ Press Contact</strong>
+          <span style="color:var(--muted);font-size:0.65rem">Add a journalist</span>
+        </button>
+        <button class="toolbar-btn" style="padding:1rem;flex-direction:column;align-items:flex-start;gap:0.4rem" onclick="closeModal();openInfluencerModal()">
+          <strong style="color:var(--ink);font-size:0.78rem">+ Creator</strong>
+          <span style="color:var(--muted);font-size:0.65rem">Add an influencer</span>
+        </button>
+      </div>
+    </div>
+  `;
+  $('modalOverlay').classList.add('open');
+}
+
+/* ════════════════ UTILITY ════════════════ */
+function renderActiveViews() {
+  renderDashboard();
+  if (currentView==='campaigns') renderCampaigns();
+  if (currentView==='tasks') renderTasksTable();
+  if (currentView==='press') renderPress();
+  if (currentView==='influencers') renderInfluencers();
+  if (currentCampaignId && $('view-campaign-detail').classList.contains('active')) renderCampaignDetail();
+}
+
+function showToast(msg) {
+  const w=$('toastWrap');
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  w.appendChild(t);
+  setTimeout(()=>t.style.opacity='0',2200);
+  setTimeout(()=>t.remove(),2500);
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal();closePanel();}
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();$('globalSearch').focus();}
+});
+
+// INIT
+renderDashboard();
+</script>
+</body>
+</html>
