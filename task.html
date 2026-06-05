@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PressDesk — Marketing Workspace</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --ink: #0f0e0c; --paper: #f5f2ec; --cream: #ede9e0; --surface: #faf8f4;
@@ -56,6 +58,16 @@ header { background:var(--ink); color:var(--paper); padding:0 1rem; display:flex
 /* MAIN AREA */
 .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 
+/* TOP TAB NAV (primary nav, always visible) */
+.tab-nav { background:var(--cream); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:0; padding:0 0.5rem; flex-shrink:0; overflow-x:auto; overflow-y:hidden; height:42px; }
+.tab-nav::-webkit-scrollbar { height:0; }
+.tab-nav-item { font-family:'DM Mono',monospace; font-size:0.7rem; font-weight:500; text-transform:uppercase; letter-spacing:0.07em; padding:0 1rem; height:42px; border:none; background:transparent; color:var(--muted); cursor:pointer; display:flex; align-items:center; gap:0.45rem; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all 0.15s; white-space:nowrap; }
+.tab-nav-item:hover { color:var(--ink); background:var(--surface); }
+.tab-nav-item.active { color:var(--accent); border-bottom-color:var(--accent); background:var(--surface); }
+.tab-nav-item.active svg { color:var(--accent); }
+.tab-nav-count { font-size:0.6rem; background:var(--border-light); padding:0.05rem 0.4rem; color:var(--muted); font-weight:400; }
+.tab-nav-item.active .tab-nav-count { background:var(--accent-soft); color:var(--accent); }
+
 /* SUBHEADER */
 .subheader { background:var(--surface); border-bottom:1px solid var(--border); padding:0 1.25rem; display:flex; align-items:center; gap:0.5rem; height:44px; flex-shrink:0; }
 .page-title { font-family:'Instrument Serif',serif; font-size:1.3rem; font-style:italic; color:var(--ink); }
@@ -93,6 +105,17 @@ header { background:var(--ink); color:var(--paper); padding:0 1rem; display:flex
 .dash-stat-delta { font-size:0.62rem; color:var(--muted); margin-top:0.3rem; }
 
 .dash-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+/* QUICK NAV CARDS */
+.dash-quick-nav { display:grid; grid-template-columns:repeat(4,1fr); gap:0.75rem; margin-bottom:1.5rem; }
+.quick-nav-card { display:flex; align-items:center; gap:0.75rem; padding:0.85rem 1rem; background:var(--surface); border:1px solid var(--border); cursor:pointer; transition:all 0.15s; font-family:'DM Mono',monospace; text-align:left; }
+.quick-nav-card:hover { border-color:var(--ink); transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+.quick-nav-icon { width:36px; height:36px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.quick-nav-label { font-size:0.78rem; font-weight:600; color:var(--ink); line-height:1.2; }
+.quick-nav-sub { font-size:0.62rem; color:var(--muted); margin-top:0.2rem; text-transform:uppercase; letter-spacing:0.06em; }
+@media (max-width: 900px) {
+  .dash-quick-nav { grid-template-columns:repeat(2,1fr); }
+}
 .dash-card { background:var(--surface); border:1px solid var(--border); padding:1rem 1.25rem; }
 .dash-card-title { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:0.75rem; padding-bottom:0.4rem; border-bottom:1px solid var(--border-light); }
 .dash-task-row { display:flex; align-items:center; gap:0.6rem; padding:0.45rem 0; border-bottom:1px solid var(--border-light); cursor:pointer; transition:background 0.12s; padding-left:0.3rem; padding-right:0.3rem; }
@@ -282,6 +305,38 @@ header { background:var(--ink); color:var(--paper); padding:0 1rem; display:flex
 .btn-cancel { font-family:'DM Mono',monospace; font-size:0.68rem; padding:0.45rem 0.9rem; background:transparent; border:1px solid var(--border); color:var(--muted); cursor:pointer; transition:all 0.15s; }
 .btn-cancel:hover { border-color:var(--ink); color:var(--ink); }
 
+/* IMPORT MODAL */
+.import-modal { width:780px; }
+.drop-zone { border:2px dashed var(--border); padding:2.5rem 1.5rem; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--paper); }
+.drop-zone:hover, .drop-zone.dragging { border-color:var(--accent); background:var(--accent-soft); }
+.drop-zone-icon { font-size:2rem; margin-bottom:0.75rem; opacity:0.5; }
+.drop-zone-text { font-size:0.85rem; font-weight:500; color:var(--ink); margin-bottom:0.3rem; }
+.drop-zone-sub { font-size:0.7rem; color:var(--muted); line-height:1.5; }
+.drop-zone-link { color:var(--accent); text-decoration:underline; cursor:pointer; }
+
+.import-template { display:flex; align-items:center; justify-content:space-between; padding:0.7rem 0.9rem; background:var(--cream); border:1px solid var(--border-light); margin-top:0.75rem; font-size:0.7rem; }
+.import-template-text { color:var(--muted); }
+.import-template a { color:var(--accent); text-decoration:none; font-weight:500; cursor:pointer; }
+.import-template a:hover { text-decoration:underline; }
+
+.mapping-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.75rem; margin-bottom:1rem; padding:0.85rem; background:var(--cream); border:1px solid var(--border-light); }
+.mapping-row { display:flex; flex-direction:column; gap:0.25rem; }
+.mapping-label { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); }
+.mapping-label .req { color:var(--accent); }
+.mapping-select { font-family:'DM Mono',monospace; font-size:0.7rem; padding:0.4rem 0.55rem; background:white; border:1px solid var(--border); color:var(--ink); outline:none; }
+.mapping-select.unmapped { color:var(--muted); }
+
+.preview-wrap { border:1px solid var(--border); max-height:280px; overflow:auto; margin-bottom:1rem; }
+.preview-table { width:100%; border-collapse:collapse; font-size:0.68rem; }
+.preview-table thead th { position:sticky; top:0; background:var(--ink); color:var(--paper); padding:0.4rem 0.65rem; text-align:left; font-size:0.6rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:500; white-space:nowrap; }
+.preview-table tbody td { padding:0.4rem 0.65rem; border-bottom:1px solid var(--border-light); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
+.preview-table tbody tr:nth-child(even) { background:var(--cream); }
+
+.import-summary { padding:0.75rem 0.9rem; background:var(--accent-soft); border-left:3px solid var(--accent); font-size:0.72rem; margin-bottom:1rem; color:var(--ink); }
+.import-summary strong { color:var(--accent); }
+
+.import-warning { padding:0.6rem 0.85rem; background:var(--gold-soft); border-left:3px solid var(--gold); font-size:0.68rem; margin-bottom:0.75rem; color:#5a4400; line-height:1.5; }
+
 /* TOAST */
 .toast-wrap { position:fixed; bottom:1.5rem; right:1.5rem; z-index:999; display:flex; flex-direction:column; gap:0.5rem; pointer-events:none; }
 .toast { background:var(--ink); color:var(--paper); padding:0.5rem 0.85rem; font-size:0.68rem; border-left:3px solid var(--accent); animation:toastIn 0.2s ease; }
@@ -318,7 +373,7 @@ header { background:var(--ink); color:var(--paper); padding:0 1rem; display:flex
     <input type="text" placeholder="Search anything..." id="globalSearch">
     <span class="kbd">⌘K</span>
   </div>
-  <button class="btn-secondary" onclick="showToast('Settings coming soon')">Settings</button>
+  <button class="btn-secondary" id="saveIndicator" onclick="openWorkspaceMenu()" title="View workspace data options">● Auto-saved locally</button>
   <button class="btn-primary" onclick="openQuickAdd()">+ Quick Add</button>
 </header>
 
@@ -364,6 +419,30 @@ header { background:var(--ink); color:var(--paper); padding:0 1rem; display:flex
 
   <!-- MAIN AREA -->
   <div class="main-area">
+    <!-- TOP TAB NAV (always visible — primary nav) -->
+    <nav class="tab-nav" id="tabNav">
+      <button class="tab-nav-item active" data-tab-view="dashboard" onclick="switchView('dashboard')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Dashboard
+      </button>
+      <button class="tab-nav-item" data-tab-view="campaigns" onclick="switchView('campaigns')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+        Campaigns <span class="tab-nav-count" id="tabCount-campaigns">0</span>
+      </button>
+      <button class="tab-nav-item" data-tab-view="tasks" onclick="switchView('tasks')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 11l3 3L22 4"/></svg>
+        Tasks <span class="tab-nav-count" id="tabCount-tasks">0</span>
+      </button>
+      <button class="tab-nav-item" data-tab-view="press" onclick="switchView('press')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6z"/></svg>
+        Press <span class="tab-nav-count" id="tabCount-press">0</span>
+      </button>
+      <button class="tab-nav-item" data-tab-view="influencers" onclick="switchView('influencers')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        Creators <span class="tab-nav-count" id="tabCount-influencers">0</span>
+      </button>
+    </nav>
+
     <!-- SUBHEADER -->
     <div class="subheader">
       <div class="page-title" id="pageTitle">Dashboard</div>
@@ -382,6 +461,46 @@ header { background:var(--ink); color:var(--paper); padding:0 1rem; display:flex
         </div>
 
         <div class="dash-stats" id="dashStats"></div>
+
+        <!-- Quick jump nav cards -->
+        <div class="dash-quick-nav">
+          <button class="quick-nav-card" onclick="switchView('campaigns')">
+            <div class="quick-nav-icon" style="background:var(--accent-soft);color:var(--accent)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+            </div>
+            <div>
+              <div class="quick-nav-label">View all Campaigns</div>
+              <div class="quick-nav-sub" id="qn-campaigns-sub"></div>
+            </div>
+          </button>
+          <button class="quick-nav-card" onclick="switchView('tasks')">
+            <div class="quick-nav-icon" style="background:var(--gold-soft);color:var(--gold)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 11l3 3L22 4"/></svg>
+            </div>
+            <div>
+              <div class="quick-nav-label">All Tasks</div>
+              <div class="quick-nav-sub" id="qn-tasks-sub"></div>
+            </div>
+          </button>
+          <button class="quick-nav-card" onclick="switchView('press')">
+            <div class="quick-nav-icon" style="background:var(--teal-soft);color:var(--teal)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6z"/></svg>
+            </div>
+            <div>
+              <div class="quick-nav-label">Press &amp; Journalists</div>
+              <div class="quick-nav-sub" id="qn-press-sub"></div>
+            </div>
+          </button>
+          <button class="quick-nav-card" onclick="switchView('influencers')">
+            <div class="quick-nav-icon" style="background:var(--purple-soft);color:var(--purple)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            </div>
+            <div>
+              <div class="quick-nav-label">Creators &amp; Influencers</div>
+              <div class="quick-nav-sub" id="qn-creators-sub"></div>
+            </div>
+          </button>
+        </div>
 
         <div class="dash-grid">
           <div class="dash-card">
@@ -671,8 +790,10 @@ function switchView(view, opts={}) {
   currentView = view;
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.tab-nav-item').forEach(n => n.classList.remove('active'));
   $('view-'+view)?.classList.add('active');
   document.querySelector(`.nav-item[data-view="${view}"]`)?.classList.add('active');
+  document.querySelector(`.tab-nav-item[data-tab-view="${view}"]`)?.classList.add('active');
 
   const titles = { dashboard:'Dashboard', campaigns:'Campaigns', tasks:'All Tasks', press:'Press · Journalists', influencers:'Creators · Influencers' };
   const subs = {
@@ -690,8 +811,8 @@ function switchView(view, opts={}) {
   const actions = {
     campaigns: `<button class="toolbar-btn" onclick="openCampaignModal()">+ New Campaign</button>`,
     tasks:     `<button class="toolbar-btn" onclick="openTaskModal()">+ New Task</button>`,
-    press:     `<button class="toolbar-btn" onclick="openPressModal()">+ Add Press Contact</button>`,
-    influencers:`<button class="toolbar-btn" onclick="openInfluencerModal()">+ Add Creator</button>`,
+    press:     `<button class="toolbar-btn" onclick="openImportModal('press')">↑ Import from Excel</button> <button class="toolbar-btn" onclick="openPressModal()">+ Add Press Contact</button>`,
+    influencers:`<button class="toolbar-btn" onclick="openImportModal('influencer')">↑ Import from Excel</button> <button class="toolbar-btn" onclick="openInfluencerModal()">+ Add Creator</button>`,
     dashboard: ''
   };
   $('pageActions').innerHTML = actions[view] || '';
@@ -709,8 +830,10 @@ function openCampaign(id) {
   currentDetailTab = 'tasks';
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.tab-nav-item').forEach(n => n.classList.remove('active'));
   $('view-campaign-detail').classList.add('active');
   document.querySelector('.nav-item[data-view="campaigns"]')?.classList.add('active');
+  document.querySelector('.tab-nav-item[data-tab-view="campaigns"]')?.classList.add('active');
   renderCampaignDetail();
 }
 
@@ -759,6 +882,18 @@ function renderDashboard() {
   $('navCount-tasks').textContent = tasks.filter(t=>t.status!=='Done').length;
   $('navCount-press').textContent = pressContacts.length;
   $('navCount-influencers').textContent = influencers.length;
+
+  // counts in top tab nav
+  $('tabCount-campaigns').textContent = campaigns.length;
+  $('tabCount-tasks').textContent = tasks.filter(t=>t.status!=='Done').length;
+  $('tabCount-press').textContent = pressContacts.length;
+  $('tabCount-influencers').textContent = influencers.length;
+
+  // quick nav subtitles
+  const qnCS = $('qn-campaigns-sub'); if (qnCS) qnCS.textContent = `${campaigns.length} total · ${active.length} active`;
+  const qnTS = $('qn-tasks-sub');     if (qnTS) qnTS.textContent = `${openTasks.length} open · ${overdue.length} overdue`;
+  const qnPS = $('qn-press-sub');     if (qnPS) qnPS.textContent = `${pressContacts.length} contacts`;
+  const qnCR = $('qn-creators-sub');  if (qnCR) qnCR.textContent = `${influencers.length} creators`;
 
   // pinned campaigns sidebar
   $('pinnedCampaigns').innerHTML = campaigns.slice(0,4).map(c => `
@@ -1104,13 +1239,14 @@ function openTaskPanel(id) {
   $('panelOverlay').classList.add('open');
 }
 
-function updateTaskStatus(id, status) { const t=tasks.find(x=>x.id===id); if(t){t.status=status;openTaskPanel(id);renderActiveViews();showToast('Status → '+status);} }
-function saveTaskNotes(id) { const t=tasks.find(x=>x.id===id);const el=$('taskNotes_'+id); if(t&&el){t.notes=el.value;showToast('Notes saved.');} }
+function updateTaskStatus(id, status) { const t=tasks.find(x=>x.id===id); if(t){t.status=status;Cloud.push('tasks',t);openTaskPanel(id);renderActiveViews();showToast('Status → '+status);} }
+function saveTaskNotes(id) { const t=tasks.find(x=>x.id===id);const el=$('taskNotes_'+id); if(t&&el){t.notes=el.value;Cloud.push('tasks',t);saveState();showToast('Notes saved.');} }
 
 function unlinkContact(taskId, type, contactId) {
   const t = tasks.find(x=>x.id===taskId); if(!t) return;
   const key = type==='press'?'pressIds':'influencerIds';
   t[key] = t[key].filter(id=>id!==contactId);
+  Cloud.push('tasks', t);
   openTaskPanel(taskId);
   renderActiveViews();
   showToast('Unlinked.');
@@ -1171,6 +1307,7 @@ function linkContact(taskId, type, contactId) {
   const t = tasks.find(x=>x.id===taskId);
   const key = type==='press'?'pressIds':'influencerIds';
   if (!t[key].includes(contactId)) { t[key].push(contactId); }
+  Cloud.push('tasks', t);
   openTaskPanel(taskId);
   renderActiveViews();
   showToast('Linked.');
@@ -1291,10 +1428,17 @@ function openInfluencerPanel(id) {
 
 function updateContactStatus(type, id, status) {
   const list = type==='press' ? pressContacts : influencers;
-  const c = list.find(x=>x.id===id); if(c){c.status=status; type==='press'?openPressPanel(id):openInfluencerPanel(id); renderActiveViews(); showToast('Status → '+status);}
+  const c = list.find(x=>x.id===id);
+  if(c){
+    c.status=status;
+    Cloud.push(type==='press'?'press_contacts':'influencers', c);
+    type==='press'?openPressPanel(id):openInfluencerPanel(id);
+    renderActiveViews();
+    showToast('Status → '+status);
+  }
 }
-function savePressNotes(id) { const c=pressContacts.find(x=>x.id===id);const el=$('pressNotes_'+id); if(c&&el){c.notes=el.value;showToast('Notes saved.');} }
-function saveInfluencerNotes(id) { const c=influencers.find(x=>x.id===id);const el=$('infNotes_'+id); if(c&&el){c.notes=el.value;showToast('Notes saved.');} }
+function savePressNotes(id) { const c=pressContacts.find(x=>x.id===id);const el=$('pressNotes_'+id); if(c&&el){c.notes=el.value;Cloud.push('press_contacts',c);saveState();showToast('Notes saved.');} }
+function saveInfluencerNotes(id) { const c=influencers.find(x=>x.id===id);const el=$('infNotes_'+id); if(c&&el){c.notes=el.value;Cloud.push('influencers',c);saveState();showToast('Notes saved.');} }
 
 function closePanel() { $('panelOverlay').classList.remove('open'); }
 
@@ -1356,15 +1500,18 @@ function saveTask() {
     dueDate: $('m_dueDate').value,
     notes: $('m_notes').value.trim(),
   };
+  let saved;
   if (editingId) {
     const idx = tasks.findIndex(t=>t.id===editingId);
     tasks[idx] = { ...tasks[idx], ...data };
+    saved = tasks[idx];
     showToast('Task updated.');
   } else {
-    const newId = Math.max(0,...tasks.map(t=>t.id))+1;
-    tasks.push({ id:newId, ...data, pressIds:[], influencerIds:[] });
+    saved = { id:newId(), ...data, pressIds:[], influencerIds:[] };
+    tasks.push(saved);
     showToast('Task created.');
   }
+  Cloud.push('tasks', saved);
   closeModal(); renderActiveViews();
 }
 
@@ -1411,16 +1558,19 @@ function saveCampaign() {
     startDate:$('m_startDate').value, endDate:$('m_endDate').value,
     description:$('m_description').value.trim()||''
   };
+  let saved;
   if (editingId) {
     const idx = campaigns.findIndex(c=>c.id===editingId);
     campaigns[idx] = { ...campaigns[idx], ...data };
+    saved = campaigns[idx];
     showToast('Campaign updated.');
   } else {
     const colors = ['#c8411b','#1a6b5e','#5b3eb8','#b8860b','#1e6fa8'];
-    const newId = Math.max(0,...campaigns.map(c=>c.id))+1;
-    campaigns.push({ id:newId, ...data, color:colors[newId%colors.length] });
+    saved = { id:newId(), ...data, color:colors[campaigns.length%colors.length] };
+    campaigns.push(saved);
     showToast('Campaign created.');
   }
+  Cloud.push('campaigns', saved);
   closeModal(); renderActiveViews();
   if (currentView==='campaign-detail'||currentCampaignId) renderCampaignDetail();
 }
@@ -1475,15 +1625,18 @@ function savePress() {
     region:$('m_region').value.trim(), platform:$('m_platform').value.trim(),
     lastContacted:$('m_lastContacted').value, notes:$('m_notes').value.trim()
   };
+  let saved;
   if (editingId) {
     const idx = pressContacts.findIndex(c=>c.id===editingId);
     pressContacts[idx] = { ...pressContacts[idx], ...data };
+    saved = pressContacts[idx];
     showToast('Contact updated.');
   } else {
-    const newId = Math.max(0,...pressContacts.map(c=>c.id))+1;
-    pressContacts.push({ id:newId, ...data });
+    saved = { id:newId(), ...data };
+    pressContacts.push(saved);
     showToast('Press contact added.');
   }
+  Cloud.push('press_contacts', saved);
   closeModal(); renderActiveViews();
 }
 
@@ -1542,19 +1695,284 @@ function saveInfluencer() {
     language:$('m_language').value, email:$('m_email').value.trim(),
     lastContacted:$('m_lastContacted').value, notes:$('m_notes').value.trim()
   };
+  let saved;
   if (editingId) {
     const idx = influencers.findIndex(c=>c.id===editingId);
     influencers[idx] = { ...influencers[idx], ...data };
+    saved = influencers[idx];
     showToast('Creator updated.');
   } else {
-    const newId = Math.max(0,...influencers.map(c=>c.id))+1;
-    influencers.push({ id:newId, ...data });
+    saved = { id:newId(), ...data };
+    influencers.push(saved);
     showToast('Creator added.');
   }
+  Cloud.push('influencers', saved);
   closeModal(); renderActiveViews();
 }
 
-function closeModal() { $('modalOverlay').classList.remove('open'); }
+function closeModal() { $('modalOverlay').classList.remove('open'); $('modal').className = 'modal'; }
+
+/* ════════════════ IMPORT FROM EXCEL/CSV ════════════════ */
+let importState = { type:null, rows:[], headers:[], mapping:{} };
+
+// Field definitions for each contact type
+const IMPORT_FIELDS = {
+  influencer: [
+    { key:'name',      label:'Creator Name',    required:true,  patterns:['name','creator','influencer','who'] },
+    { key:'handle',    label:'Handle',          required:false, patterns:['handle','username','user','@','channel name'] },
+    { key:'platform',  label:'Platform(s)',     required:false, patterns:['platform','channel','network','social'] },
+    { key:'followers', label:'Followers',       required:false, patterns:['follower','subscriber','audience','fans','reach','size','count'] },
+    { key:'niche',     label:'Niche',           required:false, patterns:['niche','category','genre','topic','vertical','type','tag'] },
+    { key:'region',    label:'Region',          required:false, patterns:['region','country','location','market','geo','territory'] },
+    { key:'language',  label:'Language',        required:false, patterns:['language','lang'] },
+    { key:'email',     label:'Email',           required:false, patterns:['email','e-mail','mail','contact'] },
+    { key:'notes',     label:'Notes',           required:false, patterns:['notes','comments','description','about','bio','details'] },
+  ],
+  press: [
+    { key:'name',          label:'Journalist Name', required:true,  patterns:['name','journalist','reporter','writer'] },
+    { key:'email',         label:'Email',           required:false, patterns:['email','e-mail','mail','contact'] },
+    { key:'publication',   label:'Publication',     required:false, patterns:['publication','outlet','magazine','site','media','source'] },
+    { key:'language',      label:'Language',        required:false, patterns:['language','lang'] },
+    { key:'region',        label:'Region',          required:false, patterns:['region','country','location','market'] },
+    { key:'platform',      label:'Platforms',       required:false, patterns:['platform','beat','coverage'] },
+    { key:'lastContacted', label:'Last Contacted',  required:false, patterns:['last contact','last contacted','date','contacted'] },
+    { key:'notes',         label:'Notes',           required:false, patterns:['notes','comments','description','about'] },
+  ]
+};
+
+function openImportModal(type) {
+  importState = { type, rows:[], headers:[], mapping:{} };
+  $('modal').className = 'modal import-modal';
+  $('modal').innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">Import ${type==='press'?'Press Contacts':'Creators'} from Excel</span>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="importBody">
+      ${renderImportStep1(type)}
+    </div>
+  `;
+  $('modalOverlay').classList.add('open');
+  setupDropZone();
+}
+
+function renderImportStep1(type) {
+  return `
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <div class="drop-zone-icon">📊</div>
+      <div class="drop-zone-text">Drop your spreadsheet here</div>
+      <div class="drop-zone-sub">or <span class="drop-zone-link">click to browse</span><br>Supports .xlsx, .xls, .csv (max 10MB)</div>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(this.files[0])">
+    </div>
+    <div class="import-template">
+      <span class="import-template-text">Need a template?</span>
+      <a onclick="downloadTemplate('${type}')">↓ Download ${type==='press'?'press':'creator'} template</a>
+    </div>
+    <div style="margin-top:1rem;font-size:0.7rem;color:var(--muted);line-height:1.6">
+      <strong style="color:var(--ink)">What happens next:</strong><br>
+      1. Your file is parsed in your browser — nothing is uploaded anywhere.<br>
+      2. You'll see a preview with auto-detected column mappings.<br>
+      3. Adjust mappings if needed, then click Import.
+    </div>
+  `;
+}
+
+function setupDropZone() {
+  const dz = $('dropZone');
+  if (!dz) return;
+  ['dragenter','dragover'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); dz.classList.add('dragging'); }));
+  ['dragleave','drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); dz.classList.remove('dragging'); }));
+  dz.addEventListener('drop', ev => {
+    const f = ev.dataTransfer.files[0];
+    if (f) handleFile(f);
+  });
+}
+
+function handleFile(file) {
+  if (!file) return;
+  if (file.size > 10*1024*1024) { showToast('File too large (10MB max).'); return; }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const isCSV = file.name.toLowerCase().endsWith('.csv');
+      let workbook;
+      if (isCSV) {
+        const text = new TextDecoder('utf-8').decode(e.target.result);
+        workbook = XLSX.read(text, { type:'string' });
+      } else {
+        const data = new Uint8Array(e.target.result);
+        workbook = XLSX.read(data, { type:'array' });
+      }
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(firstSheet, { header:1, defval:'', blankrows:false });
+      if (!json.length) { showToast('Spreadsheet is empty.'); return; }
+
+      const headers = (json[0]||[]).map(h => String(h||'').trim());
+      const rows = json.slice(1).filter(r => r.some(cell => String(cell||'').trim() !== ''));
+
+      if (!headers.length || !rows.length) { showToast('No data rows found.'); return; }
+
+      importState.headers = headers;
+      importState.rows = rows;
+      importState.mapping = autoDetectMapping(headers, importState.type);
+
+      renderImportStep2();
+    } catch (err) {
+      console.error(err);
+      showToast('Couldn\'t read this file. Try saving as .xlsx or .csv.');
+    }
+  };
+  reader.onerror = () => showToast('Couldn\'t read file.');
+  if (file.name.toLowerCase().endsWith('.csv')) reader.readAsArrayBuffer(file);
+  else reader.readAsArrayBuffer(file);
+}
+
+function autoDetectMapping(headers, type) {
+  const fields = IMPORT_FIELDS[type];
+  const mapping = {};
+  fields.forEach(f => {
+    const idx = headers.findIndex(h => {
+      const lh = h.toLowerCase();
+      return f.patterns.some(p => lh.includes(p));
+    });
+    if (idx >= 0) mapping[f.key] = idx;
+  });
+  return mapping;
+}
+
+function renderImportStep2() {
+  const { type, headers, rows, mapping } = importState;
+  const fields = IMPORT_FIELDS[type];
+  const validRows = rows.filter(r => {
+    const nameIdx = mapping.name;
+    return nameIdx != null && r[nameIdx] && String(r[nameIdx]).trim() !== '';
+  });
+
+  $('importBody').innerHTML = `
+    <div class="import-summary">
+      Found <strong>${rows.length}</strong> row${rows.length!==1?'s':''} in your spreadsheet.
+      <strong>${validRows.length}</strong> will be imported (rows with a name).
+    </div>
+
+    ${rows.length > validRows.length ? `<div class="import-warning">${rows.length - validRows.length} row${rows.length-validRows.length!==1?'s':''} skipped because they're missing a name.</div>` : ''}
+
+    <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.5rem;font-weight:500">1. Map your columns</div>
+    <div class="mapping-grid">
+      ${fields.map(f => `
+        <div class="mapping-row">
+          <label class="mapping-label">${f.label} ${f.required?'<span class="req">*</span>':''}</label>
+          <select class="mapping-select ${mapping[f.key]==null?'unmapped':''}" onchange="updateMapping('${f.key}',this.value)">
+            <option value="">— not mapped —</option>
+            ${headers.map((h,i)=>`<option value="${i}" ${mapping[f.key]===i?'selected':''}>${h||'(column '+(i+1)+')'}</option>`).join('')}
+          </select>
+        </div>
+      `).join('')}
+    </div>
+
+    <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.5rem;font-weight:500">2. Preview <span style="color:var(--muted);text-transform:none;letter-spacing:normal">(first 5 rows)</span></div>
+    <div class="preview-wrap">
+      <table class="preview-table">
+        <thead><tr>${fields.map(f => `<th>${f.label}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${rows.slice(0,5).map(r => `<tr>${fields.map(f => {
+            const idx = mapping[f.key];
+            const val = idx != null ? String(r[idx]||'') : '';
+            return `<td title="${val}" style="${idx==null?'color:var(--border)':''}">${val||'—'}</td>`;
+          }).join('')}</tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex;gap:0.75rem;align-items:center;justify-content:space-between;margin-top:1rem">
+      <button class="btn-cancel" onclick="openImportModal('${type}')">← Choose different file</button>
+      <button class="btn-primary" onclick="executeImport()" ${mapping.name==null?'disabled style="opacity:0.5;cursor:not-allowed"':''}>
+        Import ${validRows.length} ${type==='press'?'press contact':'creator'}${validRows.length!==1?'s':''}
+      </button>
+    </div>
+  `;
+}
+
+function updateMapping(fieldKey, valueStr) {
+  importState.mapping[fieldKey] = valueStr === '' ? null : parseInt(valueStr);
+  renderImportStep2();
+}
+
+function executeImport() {
+  const { type, rows, mapping } = importState;
+  if (mapping.name == null) { showToast('Map the Name column first.'); return; }
+
+  const list = type==='press' ? pressContacts : influencers;
+  const tableName = type==='press' ? 'press_contacts' : 'influencers';
+  const toInsert = [];
+  let added = 0;
+
+  rows.forEach(r => {
+    const nameVal = String(r[mapping.name]||'').trim();
+    if (!nameVal) return;
+    const record = { id: newId(), status:'New Entry', notes:'' };
+    IMPORT_FIELDS[type].forEach(f => {
+      if (mapping[f.key] != null) {
+        const raw = r[mapping[f.key]];
+        if (f.key === 'lastContacted') {
+          record[f.key] = formatDateForStorage(raw);
+        } else {
+          record[f.key] = String(raw||'').trim();
+        }
+      } else {
+        record[f.key] = '';
+      }
+    });
+    list.push(record);
+    toInsert.push(record);
+    added++;
+  });
+
+  // Bulk push to cloud
+  if (Cloud.enabled && toInsert.length) {
+    Cloud.pushCount++;
+    Cloud.client.from(tableName).insert(toInsert)
+      .then(({error}) => { if(error) console.error('Bulk import sync failed:', error); })
+      .finally(() => { Cloud.pushCount--; updateSaveIndicator(); });
+  }
+
+  closeModal();
+  renderActiveViews();
+  showToast(`Imported ${added} ${type==='press'?'press contact':'creator'}${added!==1?'s':''}.`);
+}
+
+function formatDateForStorage(raw) {
+  if (!raw) return '';
+  // Excel date serial number
+  if (typeof raw === 'number') {
+    const date = new Date(Math.round((raw - 25569) * 86400 * 1000));
+    if (!isNaN(date)) return date.toISOString().split('T')[0];
+  }
+  // String parsing
+  const d = new Date(raw);
+  if (!isNaN(d)) return d.toISOString().split('T')[0];
+  return '';
+}
+
+function downloadTemplate(type) {
+  const fields = IMPORT_FIELDS[type];
+  const headers = fields.map(f => f.label);
+  const sample = type==='press'
+    ? [
+        ['Jane Smith','jane@example.com','Polygon','English','North America','Steam','','Long-form features writer.'],
+        ['Alex Tan','alex@thegamer.com','TheGamer','English','UK','Switch,Steam','','Reviews indie titles.'],
+      ]
+    : [
+        ['ExampleCreator','@example','YouTube,TikTok','125k','Cozy / Sim','UK','English','contact@example.com','Reviewed Unpacking, House Flipper 2.'],
+        ['StreamerName','@streamername','Twitch','45k','Sim / Building','North America','English','hello@streamer.tv','Plays renovation games weekly.'],
+      ];
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...sample]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, type==='press'?'Press Contacts':'Creators');
+  XLSX.writeFile(wb, `pressdesk-${type}-template.xlsx`);
+  showToast('Template downloaded.');
+}
 
 function openQuickAdd() {
   $('modal').innerHTML = `
@@ -1581,6 +1999,14 @@ function openQuickAdd() {
           <strong style="color:var(--ink);font-size:0.78rem">+ Creator</strong>
           <span style="color:var(--muted);font-size:0.65rem">Add an influencer</span>
         </button>
+        <button class="toolbar-btn" style="padding:1rem;flex-direction:column;align-items:flex-start;gap:0.4rem;border-color:var(--accent);background:var(--accent-soft)" onclick="closeModal();openImportModal('influencer')">
+          <strong style="color:var(--accent);font-size:0.78rem">↑ Import Creators</strong>
+          <span style="color:var(--muted);font-size:0.65rem">From .xlsx or .csv file</span>
+        </button>
+        <button class="toolbar-btn" style="padding:1rem;flex-direction:column;align-items:flex-start;gap:0.4rem;border-color:var(--teal);background:var(--teal-soft)" onclick="closeModal();openImportModal('press')">
+          <strong style="color:var(--teal);font-size:0.78rem">↑ Import Press</strong>
+          <span style="color:var(--muted);font-size:0.65rem">From .xlsx or .csv file</span>
+        </button>
       </div>
     </div>
   `;
@@ -1589,6 +2015,7 @@ function openQuickAdd() {
 
 /* ════════════════ UTILITY ════════════════ */
 function renderActiveViews() {
+  saveState();
   renderDashboard();
   if (currentView==='campaigns') renderCampaigns();
   if (currentView==='tasks') renderTasksTable();
@@ -1605,13 +2032,442 @@ function showToast(msg) {
   setTimeout(()=>t.remove(),2500);
 }
 
+/* ════════════════ CLOUD SYNC (Supabase) ════════════════ */
+// ════════════════════════════════════════════════════════════════════
+// 👇 PASTE YOUR SUPABASE CREDENTIALS HERE TO ENABLE TEAM SYNC 👇
+//    Leave both empty strings to run in local-only mode.
+const SUPABASE_URL      = 'https://ydmjgsijxkhdxuikhhyc.supabase.co/rest/v1/';   // e.g. 'https://abcdefgh.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkbWpnc2lqeGtoZHh1aWtoaHljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NTk1MzAsImV4cCI6MjA5NjIzNTUzMH0.Awr4I5bN5MssoSFnD2Xi5dI1ZEfev59GP9TQROIKNO4';   // e.g. 'eyJhbGc...'
+// ════════════════════════════════════════════════════════════════════
+
+const Cloud = {
+  enabled: false,
+  online: false,
+  client: null,
+  pushCount: 0,
+
+  // Map JS array name → Supabase table name
+  TABLES: { campaigns:'campaigns', tasks:'tasks', press:'press_contacts', influencers:'influencers' },
+
+  init() {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return false;
+    if (typeof supabase === 'undefined') {
+      console.warn('Supabase library not loaded — using local-only mode.');
+      return false;
+    }
+    try {
+      this.client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      this.enabled = true;
+      return true;
+    } catch (e) {
+      console.error('Supabase init failed:', e);
+      return false;
+    }
+  },
+
+  normalizeTask(t) {
+    return {
+      ...t,
+      pressIds:      Array.isArray(t.pressIds)      ? t.pressIds      : (t.pressIds      ? JSON.parse(t.pressIds)      : []),
+      influencerIds: Array.isArray(t.influencerIds) ? t.influencerIds : (t.influencerIds ? JSON.parse(t.influencerIds) : []),
+    };
+  },
+
+  async loadAll() {
+    if (!this.enabled) return false;
+    try {
+      const [c, t, p, i] = await Promise.all([
+        this.client.from('campaigns').select('*').order('id'),
+        this.client.from('tasks').select('*').order('id'),
+        this.client.from('press_contacts').select('*').order('id'),
+        this.client.from('influencers').select('*').order('id'),
+      ]);
+      if (c.error) throw c.error;
+      const allEmpty = !c.data?.length && !t.data?.length && !p.data?.length && !i.data?.length;
+      if (allEmpty) {
+        console.log('Cloud is empty — seeding with local defaults.');
+        await this.seedInitial();
+      } else {
+        if (c.data) campaigns     = c.data;
+        if (t.data) tasks         = t.data.map(this.normalizeTask);
+        if (p.data) pressContacts = p.data;
+        if (i.data) influencers   = i.data;
+      }
+      this.online = true;
+      return true;
+    } catch (e) {
+      console.error('Cloud load failed:', e);
+      this.online = false;
+      return false;
+    }
+  },
+
+  async seedInitial() {
+    try {
+      if (campaigns.length)     await this.client.from('campaigns').insert(campaigns);
+      if (tasks.length)         await this.client.from('tasks').insert(tasks);
+      if (pressContacts.length) await this.client.from('press_contacts').insert(pressContacts);
+      if (influencers.length)   await this.client.from('influencers').insert(influencers);
+    } catch (e) {
+      console.error('Seed failed:', e);
+    }
+  },
+
+  async push(table, record) {
+    if (!this.enabled) return;
+    this.pushCount++;
+    try {
+      const { error } = await this.client.from(table).upsert(record);
+      if (error) throw error;
+      this.online = true;
+    } catch (e) {
+      console.error(`Cloud push to ${table} failed:`, e);
+      this.online = false;
+    } finally {
+      this.pushCount--;
+      updateSaveIndicator();
+    }
+  },
+
+  async remove(table, id) {
+    if (!this.enabled) return;
+    try {
+      await this.client.from(table).delete().eq('id', id);
+    } catch (e) { console.error('Cloud delete failed:', e); }
+  },
+
+  setupRealtime() {
+    if (!this.enabled) return;
+    const channel = this.client.channel('workspace-changes');
+    ['campaigns','tasks','press_contacts','influencers'].forEach(table => {
+      channel.on('postgres_changes', { event:'*', schema:'public', table }, payload => {
+        this.handleRealtimeChange(table, payload);
+      });
+    });
+    channel.subscribe(status => {
+      this.online = (status === 'SUBSCRIBED');
+      updateSaveIndicator();
+    });
+  },
+
+  handleRealtimeChange(table, payload) {
+    // Don't apply our own writes echoing back — they're already applied locally
+    if (this.pushCount > 0) return;
+
+    const arrRef = {
+      campaigns: () => campaigns,
+      tasks: () => tasks,
+      press_contacts: () => pressContacts,
+      influencers: () => influencers
+    }[table];
+    if (!arrRef) return;
+    const arr = arrRef();
+
+    if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+      const rec = table === 'tasks' ? this.normalizeTask(payload.new) : payload.new;
+      const idx = arr.findIndex(x => x.id === rec.id);
+      if (idx >= 0) arr[idx] = rec;
+      else arr.push(rec);
+    } else if (payload.eventType === 'DELETE') {
+      const idx = arr.findIndex(x => x.id === payload.old.id);
+      if (idx >= 0) arr.splice(idx, 1);
+    }
+
+    // Re-render but don't push (would loop)
+    renderDashboard();
+    if (currentView==='campaigns') renderCampaigns();
+    if (currentView==='tasks') renderTasksTable();
+    if (currentView==='press') renderPress();
+    if (currentView==='influencers') renderInfluencers();
+    if (currentCampaignId && document.getElementById('view-campaign-detail').classList.contains('active')) renderCampaignDetail();
+  }
+};
+
+// Helper to generate IDs that won't collide between team members
+function newId() { return Date.now() + Math.floor(Math.random() * 1000); }
+
+/* ════════════════ PERSISTENCE (localStorage) ════════════════ */
+const STORAGE_KEY = 'pressdesk-workspace-v1';
+let lastSavedAt = null;
+let saveTimeout = null;
+
+function saveState() {
+  // Debounce to avoid hammering localStorage on rapid changes
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    try {
+      const state = { campaigns, tasks, pressContacts, influencers, savedAt: new Date().toISOString() };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      lastSavedAt = new Date();
+      updateSaveIndicator();
+    } catch (e) {
+      console.error('Save failed:', e);
+      showToast('Could not save to browser storage. Storage may be full.');
+    }
+  }, 150);
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const state = JSON.parse(raw);
+    if (Array.isArray(state.campaigns) && state.campaigns.length) campaigns = state.campaigns;
+    if (Array.isArray(state.tasks)) tasks = state.tasks;
+    if (Array.isArray(state.pressContacts)) pressContacts = state.pressContacts;
+    if (Array.isArray(state.influencers)) influencers = state.influencers;
+    if (state.savedAt) lastSavedAt = new Date(state.savedAt);
+    return true;
+  } catch (e) {
+    console.error('Load failed:', e);
+    return false;
+  }
+}
+
+function updateSaveIndicator() {
+  const el = $('saveIndicator');
+  if (!el) return;
+  if (Cloud.enabled) {
+    if (Cloud.online) {
+      el.textContent = '● Cloud synced';
+      el.style.color = '#1a6b5e';
+      el.title = 'Real-time sync active. All team members see your changes.';
+    } else {
+      el.textContent = '⚠ Cloud offline';
+      el.style.color = '#c8411b';
+      el.title = 'Connection to cloud lost. Changes saved locally only.';
+    }
+    return;
+  }
+  if (!lastSavedAt) { el.textContent = '● Auto-saved locally'; return; }
+  const diff = Math.floor((new Date() - lastSavedAt) / 1000);
+  let label;
+  if (diff < 5) label = 'Saved just now';
+  else if (diff < 60) label = `Saved ${diff}s ago`;
+  else if (diff < 3600) label = `Saved ${Math.floor(diff/60)}m ago`;
+  else label = `Saved ${Math.floor(diff/3600)}h ago`;
+  el.textContent = '● ' + label;
+}
+
+setInterval(updateSaveIndicator, 30000); // refresh label every 30s
+
+function exportWorkspace() {
+  const state = { campaigns, tasks, pressContacts, influencers, savedAt: new Date().toISOString(), version:1 };
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pressdesk-workspace-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Workspace exported.');
+}
+
+function importWorkspaceFromFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const state = JSON.parse(e.target.result);
+      if (!state || !Array.isArray(state.campaigns)) { showToast('That doesn\'t look like a workspace file.'); return; }
+      if (!confirm(`Replace your current workspace with this file?\n\n${state.campaigns.length} campaigns · ${state.tasks?.length||0} tasks · ${state.pressContacts?.length||0} press · ${state.influencers?.length||0} creators\n\nThis cannot be undone.`)) return;
+      campaigns = state.campaigns;
+      tasks = state.tasks || [];
+      pressContacts = state.pressContacts || [];
+      influencers = state.influencers || [];
+      saveState();
+      renderActiveViews();
+      closeModal();
+      showToast('Workspace imported.');
+    } catch (err) {
+      showToast('Couldn\'t read this file. Is it a workspace JSON?');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetWorkspace() {
+  if (!confirm('Reset everything to the original demo data?\n\nThis will permanently delete all your changes. Consider exporting first.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+function openWorkspaceMenu() {
+  const cloudStatusHTML = Cloud.enabled
+    ? `<div style="background:${Cloud.online?'var(--teal-soft)':'var(--accent-soft)'};border-left:3px solid ${Cloud.online?'var(--teal)':'var(--accent)'};padding:0.75rem 0.9rem;font-size:0.72rem;margin-bottom:1rem;line-height:1.5;color:${Cloud.online?'#0a3c34':'#5a1a08'}">
+        <strong style="color:${Cloud.online?'var(--teal)':'var(--accent)'}">${Cloud.online?'☁ Cloud sync active':'⚠ Cloud offline'}.</strong>
+        ${Cloud.online?'Your team sees changes in real time. Data lives in your Supabase project.':'Connection to Supabase failed. Working from local cache.'}
+      </div>`
+    : `<div style="background:var(--gold-soft);border-left:3px solid var(--gold);padding:0.75rem 0.9rem;font-size:0.72rem;margin-bottom:1rem;line-height:1.5;color:#5a4400">
+        <strong style="color:#5a4400">Local-only mode.</strong> Data stays in your browser. To enable team sync, set up Supabase using the instructions below.
+      </div>`;
+
+  $('modal').innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">Workspace Data</span>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" style="max-height:78vh;overflow-y:auto">
+      ${cloudStatusHTML}
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem">
+        <button class="toolbar-btn" style="padding:0.85rem;flex-direction:column;align-items:flex-start;gap:0.3rem" onclick="exportWorkspace()">
+          <strong style="color:var(--ink);font-size:0.75rem">↓ Export Workspace</strong>
+          <span style="color:var(--muted);font-size:0.62rem">Download all data as .json</span>
+        </button>
+        <button class="toolbar-btn" style="padding:0.85rem;flex-direction:column;align-items:flex-start;gap:0.3rem" onclick="document.getElementById('importWorkspaceInput').click()">
+          <strong style="color:var(--ink);font-size:0.75rem">↑ Import Workspace</strong>
+          <span style="color:var(--muted);font-size:0.62rem">Load from a .json file</span>
+        </button>
+      </div>
+      <input type="file" id="importWorkspaceInput" accept=".json" style="display:none" onchange="importWorkspaceFromFile(this.files[0])">
+
+      ${Cloud.enabled ? '' : `
+      <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:0.5rem">
+        <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.6rem;font-weight:500">Enable team sync (Supabase)</div>
+
+        <ol style="font-size:0.72rem;line-height:1.65;color:var(--ink);padding-left:1.2rem">
+          <li>Create a free account at <a href="https://supabase.com" target="_blank" style="color:var(--accent)">supabase.com</a> and start a new project.</li>
+          <li>Once your project is ready, open the <strong>SQL Editor</strong> (left sidebar) and run the setup script below.</li>
+          <li>Go to <strong>Project Settings → API</strong> and copy your <code style="background:var(--cream);padding:0.05rem 0.3rem;font-size:0.68rem">Project URL</code> and <code style="background:var(--cream);padding:0.05rem 0.3rem;font-size:0.68rem">anon public</code> key.</li>
+          <li>Open this HTML file in a text editor, find the <code style="background:var(--cream);padding:0.05rem 0.3rem;font-size:0.68rem">SUPABASE_URL</code> and <code style="background:var(--cream);padding:0.05rem 0.3rem;font-size:0.68rem">SUPABASE_ANON_KEY</code> constants near the top of the <code style="background:var(--cream);padding:0.05rem 0.3rem;font-size:0.68rem">&lt;script&gt;</code> tag, and paste your values.</li>
+          <li>Reload the page. The status indicator should turn green.</li>
+        </ol>
+
+        <div style="margin-top:0.85rem;display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted)">SQL setup script</div>
+          <button class="toolbar-btn" style="font-size:0.62rem;padding:0.25rem 0.55rem" onclick="copySqlSetup()">📋 Copy</button>
+        </div>
+        <pre id="sqlSetup" style="background:#0f0e0c;color:#dcd2bc;font-family:'DM Mono',monospace;font-size:0.62rem;padding:0.75rem;overflow-x:auto;line-height:1.5;border:1px solid var(--border);max-height:200px;overflow-y:auto;margin-top:0.4rem">${escapeHtml(SQL_SETUP)}</pre>
+
+        <div style="background:var(--cream);padding:0.6rem 0.8rem;font-size:0.65rem;color:var(--muted);line-height:1.5;margin-top:0.6rem;border-left:3px solid var(--border)">
+          <strong style="color:var(--ink)">Security note:</strong> the default SQL grants anyone with your <code>anon</code> key full read/write access. That's fine for an internal team where the link isn't shared publicly. For stricter access (sign-in required), enable Supabase Auth and modify the RLS policies.
+        </div>
+      </div>`}
+
+      <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem">
+        <button class="btn-cancel" style="border-color:var(--accent);color:var(--accent)" onclick="resetWorkspace()">Reset all data to demo defaults</button>
+      </div>
+    </div>
+  `;
+  $('modalOverlay').classList.add('open');
+}
+
+function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function copySqlSetup() {
+  navigator.clipboard.writeText(SQL_SETUP).then(() => showToast('SQL copied to clipboard.'));
+}
+
+const SQL_SETUP = `-- ════════════════════════════════════════════════════════════════
+-- PressDesk Workspace — Supabase setup
+-- Run this in: Supabase project → SQL Editor → New Query → Run
+-- ════════════════════════════════════════════════════════════════
+
+create table if not exists campaigns (
+  id          bigint primary key,
+  name        text not null,
+  project     text,
+  status      text,
+  "startDate" date,
+  "endDate"   date,
+  description text,
+  color       text,
+  "updatedAt" timestamptz default now()
+);
+
+create table if not exists tasks (
+  id              bigint primary key,
+  "campaignId"    bigint,
+  title           text not null,
+  status          text,
+  priority        text,
+  assignee        text,
+  "dueDate"       date,
+  notes           text,
+  "pressIds"      jsonb default '[]'::jsonb,
+  "influencerIds" jsonb default '[]'::jsonb,
+  "updatedAt"     timestamptz default now()
+);
+
+create table if not exists press_contacts (
+  id              bigint primary key,
+  name            text not null,
+  status          text,
+  email           text,
+  publication     text,
+  language        text,
+  region          text,
+  platform        text,
+  "lastContacted" date,
+  notes           text,
+  "updatedAt"     timestamptz default now()
+);
+
+create table if not exists influencers (
+  id              bigint primary key,
+  name            text not null,
+  handle          text,
+  platform        text,
+  followers       text,
+  niche           text,
+  region          text,
+  language        text,
+  email           text,
+  status          text,
+  "lastContacted" date,
+  notes           text,
+  "updatedAt"     timestamptz default now()
+);
+
+-- Row Level Security: allow anonymous full access
+-- (Fine for trusted internal team. Tighten later with Supabase Auth.)
+alter table campaigns      enable row level security;
+alter table tasks          enable row level security;
+alter table press_contacts enable row level security;
+alter table influencers    enable row level security;
+
+drop policy if exists "Allow anon all" on campaigns;
+drop policy if exists "Allow anon all" on tasks;
+drop policy if exists "Allow anon all" on press_contacts;
+drop policy if exists "Allow anon all" on influencers;
+
+create policy "Allow anon all" on campaigns      for all using (true) with check (true);
+create policy "Allow anon all" on tasks          for all using (true) with check (true);
+create policy "Allow anon all" on press_contacts for all using (true) with check (true);
+create policy "Allow anon all" on influencers    for all using (true) with check (true);
+
+-- Enable real-time broadcasts on all tables
+alter publication supabase_realtime add table campaigns;
+alter publication supabase_realtime add table tasks;
+alter publication supabase_realtime add table press_contacts;
+alter publication supabase_realtime add table influencers;`;
+
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeModal();closePanel();}
   if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();$('globalSearch').focus();}
 });
 
 // INIT
-renderDashboard();
+(async function init() {
+  // 1. Try cloud first if configured
+  if (Cloud.init()) {
+    showToast('Connecting to cloud…');
+    const loaded = await Cloud.loadAll();
+    if (loaded) {
+      Cloud.setupRealtime();
+      showToast('Cloud sync active.');
+    } else {
+      showToast('Cloud unreachable — using local data.');
+      loadState();
+    }
+  } else {
+    // 2. Cloud not configured — use localStorage
+    loadState();
+  }
+  renderDashboard();
+  updateSaveIndicator();
+})();
 </script>
 </body>
 </html>
