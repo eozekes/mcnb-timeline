@@ -2263,26 +2263,75 @@ function exportWorkspace() {
   showToast('Workspace exported.');
 }
 
+async function pushAllToCloud() {
+  if (!Cloud.enabled || !Cloud.online) return;
+
+  await Cloud.client.from('campaigns').delete().neq('id', 0);
+  await Cloud.client.from('tasks').delete().neq('id', 0);
+  await Cloud.client.from('press_contacts').delete().neq('id', 0);
+  await Cloud.client.from('influencers').delete().neq('id', 0);
+
+  if (campaigns.length) {
+    await Cloud.client.from('campaigns').insert(campaigns);
+  }
+
+  if (tasks.length) {
+    await Cloud.client.from('tasks').insert(tasks);
+  }
+
+  if (pressContacts.length) {
+    await Cloud.client.from('press_contacts').insert(pressContacts);
+  }
+
+  if (influencers.length) {
+    await Cloud.client.from('influencers').insert(influencers);
+  }
+}
+
 function importWorkspaceFromFile(file) {
   if (!file) return;
+
   const reader = new FileReader();
-  reader.onload = e => {
+
+  reader.onload = async e => {
     try {
       const state = JSON.parse(e.target.result);
-      if (!state || !Array.isArray(state.campaigns)) { showToast('That doesn\'t look like a workspace file.'); return; }
-      if (!confirm(`Replace your current workspace with this file?\n\n${state.campaigns.length} campaigns · ${state.tasks?.length||0} tasks · ${state.pressContacts?.length||0} press · ${state.influencers?.length||0} creators\n\nThis cannot be undone.`)) return;
-      campaigns = state.campaigns;
+
+      if (!state || !Array.isArray(state.campaigns)) {
+        showToast('That doesn’t look like a workspace file.');
+        return;
+      }
+
+      if (!confirm(
+        `Replace your current workspace with this file?\n\n` +
+        `${state.campaigns.length} campaigns · ` +
+        `${state.tasks?.length || 0} tasks · ` +
+        `${state.pressContacts?.length || 0} press · ` +
+        `${state.influencers?.length || 0} creators`
+      )) return;
+
+      campaigns = state.campaigns || [];
       tasks = state.tasks || [];
       pressContacts = state.pressContacts || [];
       influencers = state.influencers || [];
+
       saveState();
+
+      if (Cloud.enabled && Cloud.online) {
+        await pushAllToCloud();
+      }
+
       renderActiveViews();
       closeModal();
-      showToast('Workspace imported.');
-    } catch (err) {
-      showToast('Couldn\'t read this file. Is it a workspace JSON?');
+
+      showToast('Workspace imported and synced.');
+    }
+    catch (err) {
+      console.error(err);
+      showToast('Import failed.');
     }
   };
+
   reader.readAsText(file);
 }
 
